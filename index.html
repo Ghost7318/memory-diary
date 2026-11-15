@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ふたりの思い出日記 - Memory Diary</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho:wght@600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans JP"', 'sans-serif'],
+            serif: ['"Shippori Mincho"', 'serif'],
+          },
+          colors: {
+            cream: '#FAF8F5',
+            ivory: '#F3EFEA',
+            roseAccent: '#D9777F',
+            roseDark: '#B85A62',
+            roseLight: '#FCECEE',
+            cocoa: '#4A3F3B',
+            taupe: '#8C7E78',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #FAF8F5;
+      color: #4A3F3B;
+      font-family: 'Noto Sans JP', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-journal { font-family: 'Shippori Mincho', serif; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #FAF8F5; }
+    ::-webkit-scrollbar-thumb { background: #E2D8D3; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #D9777F; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+    .animate-shake { animation: shake 0.3s ease-in-out; }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-roseLight selection:text-roseDark">
+
+  <!-- ==================== 1. パスコードロック画面 ==================== -->
+  <div id="pinLockOverlay" class="fixed inset-0 z-50 bg-cream/95 backdrop-blur-md flex flex-col items-center justify-center p-6 hidden">
+    <div class="w-full max-w-xs bg-white rounded-3xl shadow-xl border border-ivory p-8 text-center">
+      <div class="w-14 h-14 bg-roseLight text-roseAccent rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+        <i class="fa-solid fa-lock"></i>
+      </div>
+      <h2 class="font-journal text-xl font-bold text-cocoa mb-1">ふたりの思い出日記</h2>
+      <p id="pinPromptText" class="text-xs text-taupe mb-6">パスコード（4桁）を入力してください</p>
+
+      <div id="pinDotsContainer" class="flex justify-center gap-4 mb-8">
+        <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-roseAccent transition-all"></span>
+        <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-roseAccent transition-all"></span>
+        <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-roseAccent transition-all"></span>
+        <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-roseAccent transition-all"></span>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3 max-w-[240px] mx-auto">
+        <button type="button" onclick="handlePinKey('1')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">1</button>
+        <button type="button" onclick="handlePinKey('2')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">2</button>
+        <button type="button" onclick="handlePinKey('3')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">3</button>
+        <button type="button" onclick="handlePinKey('4')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">4</button>
+        <button type="button" onclick="handlePinKey('5')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">5</button>
+        <button type="button" onclick="handlePinKey('6')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">6</button>
+        <button type="button" onclick="handlePinKey('7')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">7</button>
+        <button type="button" onclick="handlePinKey('8')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">8</button>
+        <button type="button" onclick="handlePinKey('9')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">9</button>
+        <div class="h-14"></div>
+        <button type="button" onclick="handlePinKey('0')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">0</button>
+        <button type="button" onclick="handlePinDelete()" class="h-14 rounded-2xl bg-ivory/70 hover:bg-ivory active:scale-95 text-base text-taupe transition flex items-center justify-center" aria-label="削除">
+          <i class="fa-solid fa-delete-left"></i>
+        </button>
+      </div>
+      <p class="text-[10px] text-taupe/80 mt-6 leading-relaxed">忘れた場合は、ブラウザのサイトデータを削除するとロックが外れます（日記はクラウドに残ります）。</p>
+    </div>
+  </div>
+
+  <!-- ==================== 2. ヘッダー ==================== -->
+  <header class="bg-white/90 backdrop-blur-sm border-b border-ivory sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-roseAccent to-roseDark text-white flex items-center justify-center shadow-sm">
+          <i class="fa-solid fa-heart text-lg"></i>
+        </div>
+        <div>
+          <h1 class="font-journal text-lg sm:text-xl font-bold tracking-wide text-cocoa leading-tight">ふたりの思い出日記</h1>
+          <p class="text-[11px] text-taupe flex items-center gap-1.5">
+            <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
+            <span id="syncStatusText">準備中...</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="openSettingsModal()" class="p-2.5 sm:px-3.5 sm:py-2 rounded-xl bg-cream hover:bg-ivory text-cocoa text-xs sm:text-sm font-medium transition flex items-center gap-1.5 border border-ivory" title="設定">
+          <i class="fa-solid fa-gear text-taupe"></i>
+          <span class="hidden sm:inline">設定・ロック</span>
+        </button>
+        <button type="button" onclick="openEditorForDate()" class="px-4 py-2.5 rounded-xl bg-roseAccent hover:bg-roseDark active:scale-95 text-white text-xs sm:text-sm font-bold shadow-sm transition flex items-center gap-1.5">
+          <i class="fa-solid fa-pen-nib"></i>
+          <span>日記を書く</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== 3. メインコンテンツ ==================== -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+    <!-- 統計カード -->
+    <section class="grid grid-cols-3 gap-3 sm:gap-5">
+      <div onclick="openSettingsModal()" class="cursor-pointer bg-white rounded-2xl p-3.5 sm:p-5 border border-ivory shadow-sm hover:border-roseAccent/50 transition relative overflow-hidden group">
+        <div class="absolute -right-3 -bottom-3 text-roseLight/70 text-5xl sm:text-6xl pointer-events-none group-hover:scale-110 transition-transform">
+          <i class="fa-solid fa-heart"></i>
+        </div>
+        <p class="text-[11px] sm:text-xs font-medium text-taupe mb-1 flex items-center gap-1">
+          <i class="fa-solid fa-calendar-days text-roseAccent"></i>
+          <span>一緒になって</span>
+        </p>
+        <div class="relative z-10">
+          <span class="text-xl sm:text-3xl font-bold font-journal text-roseDark" id="daysTogetherCount">--</span>
+          <span class="text-xs sm:text-sm text-cocoa ml-0.5">日目</span>
+        </div>
+        <p id="anniversarySubtext" class="text-[10px] sm:text-xs text-taupe mt-1 truncate">タップして記念日を設定</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-3.5 sm:p-5 border border-ivory shadow-sm relative overflow-hidden">
+        <div class="absolute -right-2 -bottom-3 text-ivory text-5xl sm:text-6xl pointer-events-none">
+          <i class="fa-solid fa-book-open"></i>
+        </div>
+        <p class="text-[11px] sm:text-xs font-medium text-taupe mb-1 flex items-center gap-1">
+          <i class="fa-solid fa-bookmark text-roseAccent"></i>
+          <span>これまでの日記</span>
+        </p>
+        <div class="relative z-10">
+          <span id="totalEntriesCount" class="text-xl sm:text-3xl font-bold font-journal text-cocoa">…</span>
+          <span class="text-xs sm:text-sm text-cocoa ml-0.5">ページ</span>
+        </div>
+        <p id="totalEntriesSubtext" class="text-[10px] sm:text-xs text-taupe mt-1 truncate">読み込み中...</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-3.5 sm:p-5 border border-ivory shadow-sm relative overflow-hidden">
+        <div class="absolute -right-2 -bottom-3 text-ivory text-5xl sm:text-6xl pointer-events-none">
+          <i class="fa-solid fa-star"></i>
+        </div>
+        <p class="text-[11px] sm:text-xs font-medium text-taupe mb-1 flex items-center gap-1">
+          <i class="fa-regular fa-calendar-check text-roseAccent"></i>
+          <span id="currentMonthLabel">今月の記録</span>
+        </p>
+        <div class="relative z-10">
+          <span id="monthEntriesCount" class="text-xl sm:text-3xl font-bold font-journal text-cocoa">…</span>
+          <span class="text-xs sm:text-sm text-cocoa ml-0.5">件</span>
+        </div>
+        <p class="text-[10px] sm:text-xs text-taupe mt-1 truncate">今月書いた日記の数</p>
+      </div>
+    </section>
+
+    <!-- モバイル用タブ -->
+    <div class="flex lg:hidden bg-ivory p-1 rounded-2xl">
+      <button type="button" id="tabBtnCalendar" onclick="switchMobileTab('calendar')" class="flex-1 py-2 rounded-xl text-xs font-bold bg-white text-roseDark shadow-sm transition">
+        <i class="fa-regular fa-calendar mr-1"></i>カレンダー振り返り
+      </button>
+      <button type="button" id="tabBtnSearch" onclick="switchMobileTab('search')" class="flex-1 py-2 rounded-xl text-xs font-bold text-taupe transition">
+        <i class="fa-solid fa-magnifying-glass mr-1"></i>思い出一覧・検索
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- 左カラム -->
+      <div id="calendarColumn" class="lg:col-span-6 space-y-5 lg:block">
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-ivory shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="changeMonth(-1)" class="w-9 h-9 rounded-xl bg-cream hover:bg-roseLight text-cocoa flex items-center justify-center transition" aria-label="前月">
+                <i class="fa-solid fa-chevron-left text-xs"></i>
+              </button>
+              <h2 id="calendarMonthYear" class="font-journal text-lg sm:text-xl font-bold text-cocoa min-w-[130px] text-center">----年 --月</h2>
+              <button type="button" onclick="changeMonth(1)" class="w-9 h-9 rounded-xl bg-cream hover:bg-roseLight text-cocoa flex items-center justify-center transition" aria-label="翌月">
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+              </button>
+            </div>
+            <button type="button" onclick="jumpToToday()" class="px-3 py-1.5 rounded-xl bg-roseLight/70 hover:bg-roseLight text-roseDark text-xs font-bold transition">今日へ</button>
+          </div>
+
+          <div class="grid grid-cols-7 text-center text-xs font-bold text-taupe mb-2">
+            <div class="text-roseAccent py-1">日</div>
+            <div class="py-1">月</div>
+            <div class="py-1">火</div>
+            <div class="py-1">水</div>
+            <div class="py-1">木</div>
+            <div class="py-1">金</div>
+            <div class="text-sky-600 py-1">土</div>
+          </div>
+
+          <div id="calendarGrid" class="grid grid-cols-7 gap-1 sm:gap-1.5"></div>
+
+          <div class="mt-4 pt-3 border-t border-ivory flex items-center justify-between text-[11px] text-taupe">
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-heart text-roseAccent"></i> 日記がある日</span>
+            <span>日付をタップして閲覧・記入</span>
+          </div>
+        </div>
+
+        <div id="selectedDateCard" class="bg-white rounded-3xl p-5 sm:p-6 border border-ivory shadow-sm transition"></div>
+      </div>
+
+      <!-- 右カラム -->
+      <div id="searchColumn" class="lg:col-span-6 space-y-5 hidden lg:block">
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-ivory shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-journal text-lg font-bold text-cocoa flex items-center gap-2">
+              <i class="fa-solid fa-magnifying-glass text-roseAccent text-base"></i>
+              <span>思い出を探す・一覧</span>
+            </h2>
+            <span id="filteredCountBadge" class="text-xs font-medium bg-cream text-taupe px-2.5 py-1 rounded-full">0 件表示</span>
+          </div>
+
+          <div class="relative mb-3.5">
+            <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-taupe text-sm"></i>
+            <input
+              type="text"
+              id="searchInput"
+              oninput="handleSearchFilter()"
+              placeholder="キーワードで検索（例：水族館、誕生日、カフェ...）"
+              class="w-full pl-10 pr-10 py-3 rounded-2xl bg-cream border border-ivory focus:border-roseAccent focus:bg-white focus:outline-none text-sm text-cocoa placeholder-taupe/70 transition"
+            >
+            <button type="button" id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-ivory text-taupe hover:text-cocoa flex items-center justify-center text-xs" aria-label="検索をクリア">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <div id="filterTagsContainer" class="flex flex-wrap gap-1.5 mb-5">
+            <button type="button" onclick="setTagFilter('すべて')" data-tag="すべて" class="tag-chip active px-3 py-1.5 rounded-full text-xs font-bold bg-roseAccent text-white transition">すべて</button>
+            <button type="button" onclick="setTagFilter('デート')" data-tag="デート" class="tag-chip px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">💕 デート</button>
+            <button type="button" onclick="setTagFilter('記念日')" data-tag="記念日" class="tag-chip px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">🎂 記念日</button>
+            <button type="button" onclick="setTagFilter('旅行')" data-tag="旅行" class="tag-chip px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">✈️ 旅行</button>
+            <button type="button" onclick="setTagFilter('幸せ')" data-tag="幸せ" class="tag-chip px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">🥰 幸せ</button>
+            <button type="button" onclick="setTagFilter('日常')" data-tag="日常" class="tag-chip px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">☕ 日常</button>
+          </div>
+
+          <div id="entriesTimeline" class="space-y-3 max-h-[600px] overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ==================== 4. 日記作成・編集モーダル（自動保存） ==================== -->
+  <div id="editorModal" class="fixed inset-0 z-40 bg-cocoa/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-ivory overflow-hidden flex flex-col max-h-[92vh]">
+      <div class="px-6 py-4 bg-cream border-b border-ivory flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="w-8 h-8 rounded-xl bg-roseLight text-roseAccent flex items-center justify-center text-sm">
+            <i class="fa-solid fa-feather-pointed"></i>
+          </span>
+          <div>
+            <h3 id="editorModalTitle" class="font-journal text-lg font-bold text-cocoa leading-tight">思い出を記録する</h3>
+            <p id="saveIndicator" class="text-[11px] text-taupe">入力すると自動で保存されます</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeEditorModal()" class="w-8 h-8 rounded-full hover:bg-ivory text-taupe flex items-center justify-center transition" aria-label="閉じる">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="diaryForm" onsubmit="event.preventDefault(); closeEditorModal();" oninput="handleEditorInput()" onchange="handleEditorInput()" class="p-6 overflow-y-auto space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-taupe mb-1.5">日付</label>
+          <input type="date" id="entryDateInput" required class="w-full px-4 py-2.5 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:bg-white focus:outline-none text-sm text-cocoa font-medium">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-taupe mb-1.5">タグ・カテゴリ</label>
+          <div class="grid grid-cols-5 gap-1.5">
+            <label class="cursor-pointer">
+              <input type="radio" name="entryTag" value="デート" class="peer sr-only" checked>
+              <div class="text-center py-2 px-1 rounded-xl bg-cream border border-ivory peer-checked:bg-roseLight peer-checked:border-roseAccent peer-checked:text-roseDark text-xs font-medium transition">💕<br>デート</div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="entryTag" value="記念日" class="peer sr-only">
+              <div class="text-center py-2 px-1 rounded-xl bg-cream border border-ivory peer-checked:bg-roseLight peer-checked:border-roseAccent peer-checked:text-roseDark text-xs font-medium transition">🎂<br>記念日</div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="entryTag" value="旅行" class="peer sr-only">
+              <div class="text-center py-2 px-1 rounded-xl bg-cream border border-ivory peer-checked:bg-roseLight peer-checked:border-roseAccent peer-checked:text-roseDark text-xs font-medium transition">✈️<br>旅行</div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="entryTag" value="幸せ" class="peer sr-only">
+              <div class="text-center py-2 px-1 rounded-xl bg-cream border border-ivory peer-checked:bg-roseLight peer-checked:border-roseAccent peer-checked:text-roseDark text-xs font-medium transition">🥰<br>幸せ</div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="entryTag" value="日常" class="peer sr-only">
+              <div class="text-center py-2 px-1 rounded-xl bg-cream border border-ivory peer-checked:bg-roseLight peer-checked:border-roseAccent peer-checked:text-roseDark text-xs font-medium transition">☕<br>日常</div>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-taupe mb-1.5">タイトル</label>
+          <input type="text" id="entryTitleInput" maxlength="60" placeholder="例：初めての横浜みなとみらいデート！" class="w-full px-4 py-2.5 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:bg-white focus:outline-none text-sm text-cocoa">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-taupe mb-1.5">思い出メモ</label>
+          <textarea id="entryContentInput" rows="6" maxlength="5000" placeholder="今日あった嬉しいことや、ふたりの会話、感想などを自由に書いて残しましょう..." class="w-full px-4 py-3 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:bg-white focus:outline-none text-sm text-cocoa leading-relaxed resize-none"></textarea>
+        </div>
+
+        <div class="pt-1">
+          <button type="submit" class="w-full py-3 rounded-xl bg-roseAccent hover:bg-roseDark text-white text-sm font-bold shadow-md transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-check"></i>
+            <span>完了（自動で保存されます）</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== 5. 設定モーダル ==================== -->
+  <div id="settingsModal" class="fixed inset-0 z-40 bg-cocoa/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-ivory overflow-hidden max-h-[92vh] flex flex-col">
+      <div class="px-6 py-4 bg-cream border-b border-ivory flex items-center justify-between">
+        <h3 class="font-journal text-lg font-bold text-cocoa flex items-center gap-2">
+          <i class="fa-solid fa-sliders text-roseAccent"></i>
+          <span>記念日・共有・ロック設定</span>
+        </h3>
+        <button type="button" onclick="closeSettingsModal()" class="w-8 h-8 rounded-full hover:bg-ivory text-taupe flex items-center justify-center transition" aria-label="閉じる">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-5 overflow-y-auto">
+        <!-- 記念日 -->
+        <div>
+          <label class="block text-xs font-bold text-cocoa mb-1">
+            <i class="fa-solid fa-heart text-roseAccent mr-1"></i>付き合った記念日
+          </label>
+          <p class="text-[11px] text-taupe mb-2">設定すると「一緒になって〇〇日目」が自動計算されます（変更は自動で保存されます）。</p>
+          <input type="date" id="settingAnniversaryInput" onchange="saveAnniversary()" class="w-full px-4 py-2.5 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:outline-none text-sm text-cocoa">
+        </div>
+
+        <hr class="border-ivory">
+
+        <!-- 合言葉（共有） -->
+        <div id="syncSection">
+          <label class="block text-xs font-bold text-cocoa mb-1">
+            <i class="fa-solid fa-key text-roseAccent mr-1"></i>ふたりの合言葉（スマホ・PC共有）
+          </label>
+          <p class="text-[11px] text-taupe mb-2 leading-relaxed">
+            別の端末でこの合言葉を入力すると、同じ日記を見たり書いたりできます。合言葉を知っている人は日記を読めるので、ふたり以外には教えないでください。
+          </p>
+          <div class="flex items-center gap-2">
+            <code id="displaySyncCode" class="flex-1 text-xs bg-cream px-3 py-2 rounded-lg border border-ivory text-cocoa truncate tracking-wide">未設定</code>
+            <button type="button" onclick="copySyncCode()" class="px-3 py-2 rounded-lg bg-ivory hover:bg-roseLight text-cocoa text-xs font-medium transition">コピー</button>
+          </div>
+          <button type="button" onclick="openSyncModal(false)" class="mt-2 text-[11px] text-roseDark hover:underline">合言葉を入力・変更する</button>
+        </div>
+
+        <hr class="border-ivory">
+
+        <!-- パスコード -->
+        <div>
+          <label class="block text-xs font-bold text-cocoa mb-1">
+            <i class="fa-solid fa-shield-halved text-roseAccent mr-1"></i>パスコードロック（この端末のみ・4桁）
+          </label>
+          <p class="text-[11px] text-taupe mb-2">他人に画面を覗かれないための簡易ロックです。4桁入力すると自動で設定されます。</p>
+          <input type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" id="settingPinInput" oninput="handlePinSettingInput()" placeholder="新しい4桁の数字" class="w-full px-4 py-2.5 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:outline-none text-sm text-cocoa tracking-widest">
+          <div class="flex items-center justify-between mt-2">
+            <span id="pinStatusText" class="text-[11px] text-taupe">ロック：未設定</span>
+            <button type="button" id="clearPinBtn" onclick="clearPin()" class="hidden text-[11px] text-red-500 hover:underline">ロックを解除する</button>
+          </div>
+        </div>
+
+        <button type="button" onclick="closeSettingsModal()" class="w-full py-2.5 rounded-xl bg-ivory hover:bg-ivory/80 text-cocoa text-sm font-bold transition">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 6. 合言葉入力モーダル ==================== -->
+  <div id="syncModal" class="fixed inset-0 z-[45] bg-cocoa/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-ivory overflow-hidden">
+      <div class="px-6 py-4 bg-cream border-b border-ivory">
+        <h3 class="font-journal text-lg font-bold text-cocoa flex items-center gap-2">
+          <i class="fa-solid fa-key text-roseAccent"></i>
+          <span>ふたりの合言葉</span>
+        </h3>
+      </div>
+      <div class="p-6 space-y-4">
+        <p class="text-xs text-taupe leading-relaxed">
+          スマホとパソコンの<b class="text-cocoa">両方で同じ合言葉</b>を入力すると、日記が自動で共有されます。
+          最初の1台目は「ランダムに作る」がおすすめです。2台目ではその合言葉を入力してください。
+        </p>
+        <input type="text" id="syncCodeInput" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="8文字以上（例：k7mq-x2ta-9fwe）" class="w-full px-4 py-3 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:bg-white focus:outline-none text-sm text-cocoa tracking-wide">
+        <button type="button" onclick="generateSyncCode()" class="text-xs text-roseDark hover:underline flex items-center gap-1">
+          <i class="fa-solid fa-dice"></i> ランダムに作る
+        </button>
+        <p id="syncModalWarn" class="hidden text-[11px] text-amber-700 bg-amber-50 border border-amber-100 rounded-xl p-3 leading-relaxed">
+          別の合言葉に切り替えると、今の日記は表示されなくなります（元の合言葉に戻せばまた見られます）。
+        </p>
+        <div class="flex items-center gap-3">
+          <button type="button" id="syncCancelBtn" onclick="closeSyncModal()" class="flex-1 py-2.5 rounded-xl bg-ivory text-cocoa text-sm font-bold transition">キャンセル</button>
+          <button type="button" onclick="submitSyncCode()" class="flex-1 py-2.5 rounded-xl bg-roseAccent hover:bg-roseDark text-white text-sm font-bold shadow-sm transition">この合言葉で始める</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 7. 削除確認モーダル ==================== -->
+  <div id="deleteConfirmModal" class="fixed inset-0 z-50 bg-cocoa/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-xs rounded-3xl p-6 shadow-2xl border border-ivory text-center">
+      <div class="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-3 text-xl">
+        <i class="fa-regular fa-trash-can"></i>
+      </div>
+      <h4 class="font-journal text-base font-bold text-cocoa mb-1">この日記を削除しますか？</h4>
+      <p class="text-xs text-taupe mb-5">削除した思い出は元に戻せません。</p>
+      <div class="flex gap-2.5">
+        <button type="button" onclick="closeDeleteModal()" class="flex-1 py-2.5 rounded-xl bg-ivory text-cocoa text-xs font-bold">やめる</button>
+        <button type="button" onclick="confirmDeleteEntry()" class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold shadow-sm">削除する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 8. トースト ==================== -->
+  <div id="toastNotification" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] bg-cocoa text-white px-5 py-3 rounded-full shadow-lg text-xs font-medium flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 max-w-[90vw]">
+    <i id="toastIcon" class="fa-solid fa-heart text-roseAccent"></i>
+    <span id="toastMessage">保存しました</span>
+  </div>
+
+  <!-- ==================== アプリケーションロジック ==================== -->
+  <script type="module">
+    // ---------- 設定 ----------
+    const appId = (typeof __app_id !== 'undefined' ? String(__app_id) : 'memory-diary-default').replace(/[\/\s]/g, '_');
+    const LS = {
+      code: 'memoryDiary.syncCode',
+      pin: 'memoryDiary.pinHash',
+      entries: 'memoryDiary.local.entries',
+      prefs: 'memoryDiary.local.prefs'
+    };
+
+    // ---------- localStorage（使えない環境ではメモリで代用） ----------
+    const memStore = {};
+    function lsGet(k) {
+      try { const v = localStorage.getItem(k); if (v !== null) return v; } catch (e) { /* noop */ }
+      return memStore[k] ?? null;
+    }
+    function lsSet(k, v) {
+      memStore[k] = v;
+      try { localStorage.setItem(k, v); } catch (e) { /* noop */ }
+    }
+    function lsRemove(k) {
+      delete memStore[k];
+      try { localStorage.removeItem(k); } catch (e) { /* noop */ }
+    }
+
+    // ---------- 状態 ----------
+    let mode = 'connecting'; // 'connecting' | 'cloud' | 'local' | 'error'
+    let db = null, auth = null, fs = null;
+    let syncCode = '';
+    let spaceId = '';
+    let unsubEntries = null, unsubPrefs = null;
+
+    let diaryEntries = [];
+    let entriesLoaded = false;
+    let userSettings = { anniversaryDate: '' };
+
+    let currentCalYear, currentCalMonth;
+    let selectedDateStr = '';
+    let currentTagFilter = 'すべて';
+    let pendingDeleteId = null;
+
+    let pinHash = '';
+    let enteredPin = '';
+    let isUnlocked = false;
+    let pinChecking = false;
+
+    // エディタ状態
+    let editingId = '';
+    let editingCreatedAt = '';
+    let editorDirty = false;
+    let autosaveTimer = null;
+    let indicatorTimer = null;
+
+    // ---------- ユーティリティ ----------
+    function formatDateISO(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatDateJapanese(dateStr) {
+      if (!dateStr) return '';
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+      return `${y}年${m}月${d}日 (${weekdays[dt.getDay()]})`;
+    }
+
+    function getTagEmoji(tag) {
+      const map = { 'デート': '💕', '記念日': '🎂', '旅行': '✈️', '幸せ': '🥰', '日常': '☕' };
+      return map[tag] || '🌸';
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    function newId() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID().replace(/-/g, '');
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    }
+
+    function normalizeCode(s) {
+      return String(s || '').normalize('NFKC').trim().toLowerCase().replace(/[\s-]+/g, '');
+    }
+
+    async function hashString(s) {
+      const text = 'memory-diary:' + s;
+      try {
+        if (window.crypto && crypto.subtle) {
+          const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+          return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 40);
+        }
+      } catch (e) { /* フォールバックへ */ }
+      // フォールバック（cyrb53）
+      let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+      }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(14, '0');
+    }
+
+    function copyText(text, okMsg) {
+      const done = () => showToast(okMsg);
+      const fallback = () => {
+        const tmp = document.createElement('textarea');
+        tmp.value = text;
+        tmp.style.position = 'fixed';
+        tmp.style.opacity = '0';
+        document.body.appendChild(tmp);
+        tmp.select();
+        try { document.execCommand('copy'); done(); } catch (e) { showToast('コピーできませんでした', true); }
+        document.body.removeChild(tmp);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+
+    let toastTimer = null;
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toastNotification');
+      document.getElementById('toastMessage').textContent = msg;
+      document.getElementById('toastIcon').className = isError
+        ? 'fa-solid fa-circle-exclamation text-amber-400'
+        : 'fa-solid fa-heart text-roseAccent';
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 2800);
+    }
+    window.showToast = showToast;
+
+    function updateSyncStatus(status, text) {
+      const dot = document.getElementById('syncStatusDot');
+      document.getElementById('syncStatusText').textContent = text;
+      const colors = { online: 'bg-emerald-500', connecting: 'bg-amber-400', local: 'bg-amber-400', error: 'bg-red-500' };
+      dot.className = `w-2 h-2 rounded-full inline-block ${colors[status] || 'bg-amber-400'}`;
+    }
+
+    // ---------- データ層（クラウド / ローカル） ----------
+    function canSave() {
+      return mode === 'local' || (mode === 'cloud' && !!db && !!spaceId);
+    }
+
+    const entriesColRef = () => fs.collection(db, 'artifacts', appId, 'public', 'data', 'diary_' + spaceId);
+    const entryDocRef = (id) => fs.doc(db, 'artifacts', appId, 'public', 'data', 'diary_' + spaceId, id);
+    const prefsDocRef = () => fs.doc(db, 'artifacts', appId, 'public', 'data', 'prefs_' + spaceId, 'main');
+
+    function sortEntries() {
+      diaryEntries.sort((a, b) => {
+        const d = (b.date || '').localeCompare(a.date || '');
+        return d !== 0 ? d : (b.createdAt || '').localeCompare(a.createdAt || '');
+      });
+    }
+
+    function persistLocal() {
+      lsSet(LS.entries, JSON.stringify(diaryEntries));
+      lsSet(LS.prefs, JSON.stringify(userSettings));
+    }
+
+    async function saveEntryData(id, payload) {
+      if (mode === 'cloud' && db && spaceId) {
+        await fs.setDoc(entryDocRef(id), payload, { merge: true });
+      } else if (mode === 'local') {
+        const i = diaryEntries.findIndex(e => e.id === id);
+        if (i >= 0) diaryEntries[i] = { ...diaryEntries[i], ...payload };
+        else diaryEntries.push({ id, ...payload });
+        sortEntries();
+        persistLocal();
+        renderAll();
+      } else {
+        throw new Error('not-ready');
+      }
+    }
+
+    async function deleteEntryData(id) {
+      if (mode === 'cloud' && db && spaceId) {
+        await fs.deleteDoc(entryDocRef(id));
+      } else if (mode === 'local') {
+        diaryEntries = diaryEntries.filter(e => e.id !== id);
+        persistLocal();
+        renderAll();
+      } else {
+        throw new Error('not-ready');
+      }
+    }
+
+    async function savePrefs(partial) {
+      const data = { ...partial, updatedAt: new Date().toISOString() };
+      if (mode === 'cloud' && db && spaceId) {
+        await fs.setDoc(prefsDocRef(), data, { merge: true });
+      } else if (mode === 'local') {
+        userSettings = { ...userSettings, ...data };
+        persistLocal();
+        updateStatsDashboard();
+      } else {
+        throw new Error('not-ready');
+      }
+    }
+
+    // ---------- 初期化 ----------
+    function stopSync() {
+      if (unsubEntries) { unsubEntries(); unsubEntries = null; }
+      if (unsubPrefs) { unsubPrefs(); unsubPrefs = null; }
+    }
+
+    function startLocalMode() {
+      mode = 'local';
+      try { diaryEntries = JSON.parse(lsGet(LS.entries) || '[]'); } catch (e) { diaryEntries = []; }
+      try { userSettings = { anniversaryDate: '', ...JSON.parse(lsGet(LS.prefs) || '{}') }; } catch (e) { userSettings = { anniversaryDate: '' }; }
+      sortEntries();
+      entriesLoaded = true;
+      updateSyncStatus('local', 'この端末だけに自動保存中（共有は未接続）');
+      renderAll();
+    }
+
+    async function startCloudSync() {
+      stopSync();
+      spaceId = await hashString('space:' + normalizeCode(syncCode));
+      entriesLoaded = false;
+      diaryEntries = [];
+      userSettings = { anniversaryDate: '' };
+      renderAll();
+      updateSyncStatus('connecting', '同期を開始しています...');
+
+      unsubEntries = fs.onSnapshot(entriesColRef(), (snapshot) => {
+        const items = [];
+        snapshot.forEach(d => items.push({ id: d.id, ...d.data() }));
+        diaryEntries = items;
+        sortEntries();
+        entriesLoaded = true;
+        updateSyncStatus('online', '自動同期中（スマホ・PC共有）');
+        renderAll();
+      }, (error) => {
+        console.error('Entries snapshot error:', error);
+        updateSyncStatus('error', '同期エラー（再読み込みしてください）');
+        showToast('日記データの読み込みに失敗しました', true);
+      });
+
+      unsubPrefs = fs.onSnapshot(prefsDocRef(), (snap) => {
+        userSettings = snap.exists() ? { anniversaryDate: '', ...snap.data() } : { anniversaryDate: '' };
+        updateStatsDashboard();
+      }, (error) => {
+        console.error('Prefs snapshot error:', error);
+      });
+    }
+
+    async function initFirebase() {
+      if (typeof __firebase_config === 'undefined') {
+        startLocalMode();
+        return;
+      }
+      try {
+        updateSyncStatus('connecting', 'クラウドに接続中...');
+        const base = 'https://www.gstatic.com/firebasejs/11.6.1/';
+        const [appMod, authMod, fsMod] = await Promise.all([
+          import(base + 'firebase-app.js'),
+          import(base + 'firebase-auth.js'),
+          import(base + 'firebase-firestore.js')
+        ]);
+        fs = fsMod;
+        const app = appMod.initializeApp(JSON.parse(__firebase_config));
+        db = fsMod.getFirestore(app);
+        auth = authMod.getAuth(app);
+
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await authMod.signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await authMod.signInAnonymously(auth);
+        }
+
+        mode = 'cloud';
+        if (syncCode) {
+          await startCloudSync();
+        } else {
+          updateSyncStatus('connecting', '合言葉を設定してください');
+          renderAll();
+          openSyncModal(true);
+        }
+      } catch (err) {
+        console.error('Firebase initialization error:', err);
+        mode = 'error';
+        entriesLoaded = false;
+        updateSyncStatus('error', '接続エラー（再読み込みしてください）');
+        showToast('クラウドに接続できませんでした', true);
+      }
+    }
+
+    // ---------- パスコードロック ----------
+    function showLock() {
+      enteredPin = '';
+      updatePinDots();
+      document.getElementById('pinLockOverlay').classList.remove('hidden');
+    }
+
+    window.handlePinKey = async function (digit) {
+      if (pinChecking || enteredPin.length >= 4) return;
+      enteredPin += digit;
+      updatePinDots();
+
+      if (enteredPin.length === 4) {
+        pinChecking = true;
+        const h = await hashString('pin:' + enteredPin);
+        pinChecking = false;
+        if (h === pinHash) {
+          isUnlocked = true;
+          document.getElementById('pinLockOverlay').classList.add('hidden');
+          enteredPin = '';
+          updatePinDots();
+          showToast('ロックを解除しました');
+        } else {
+          const container = document.getElementById('pinDotsContainer');
+          const prompt = document.getElementById('pinPromptText');
+          container.classList.add('animate-shake');
+          prompt.textContent = 'パスコードが違います';
+          prompt.classList.add('text-red-500');
+          setTimeout(() => {
+            container.classList.remove('animate-shake');
+            enteredPin = '';
+            updatePinDots();
+            prompt.textContent = 'パスコード（4桁）を入力してください';
+            prompt.classList.remove('text-red-500');
+          }, 500);
+        }
+      }
+    };
+
+    window.handlePinDelete = function () {
+      if (pinChecking) return;
+      enteredPin = enteredPin.slice(0, -1);
+      updatePinDots();
+    };
+
+    function updatePinDots() {
+      document.querySelectorAll('.pin-dot').forEach((dot, idx) => {
+        if (idx < enteredPin.length) dot.classList.add('bg-roseAccent', 'scale-110');
+        else dot.classList.remove('bg-roseAccent', 'scale-110');
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (document.getElementById('pinLockOverlay').classList.contains('hidden')) return;
+      if (/^\d$/.test(e.key)) window.handlePinKey(e.key);
+      else if (e.key === 'Backspace') window.handlePinDelete();
+    });
+
+    function refreshPinStatus() {
+      document.getElementById('pinStatusText').textContent = pinHash ? 'ロック：設定済み（変更は新しい4桁を入力）' : 'ロック：未設定';
+      document.getElementById('clearPinBtn').classList.toggle('hidden', !pinHash);
+    }
+
+    window.handlePinSettingInput = async function () {
+      const el = document.getElementById('settingPinInput');
+      const cleaned = el.value.replace(/\D/g, '');
+      if (cleaned !== el.value) el.value = cleaned;
+      if (cleaned.length === 4) {
+        pinHash = await hashString('pin:' + cleaned);
+        lsSet(LS.pin, pinHash);
+        isUnlocked = true;
+        el.value = '';
+        refreshPinStatus();
+        showToast('パスコードを設定しました');
+      }
+    };
+
+    window.clearPin = function () {
+      pinHash = '';
+      lsRemove(LS.pin);
+      refreshPinStatus();
+      showToast('パスコードロックを解除しました');
+    };
+
+    // ---------- 統計 ----------
+    function updateStatsDashboard() {
+      const now = new Date();
+
+      const totalEl = document.getElementById('totalEntriesCount');
+      const totalSub = document.getElementById('totalEntriesSubtext');
+      const monthEl = document.getElementById('monthEntriesCount');
+      document.getElementById('currentMonthLabel').textContent = `${now.getMonth() + 1}月の記録`;
+
+      if (entriesLoaded) {
+        const thisYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const monthCount = diaryEntries.filter(e => (e.date || '').startsWith(thisYearMonth)).length;
+        const days = new Set(diaryEntries.map(e => e.date)).size;
+        totalEl.textContent = diaryEntries.length.toLocaleString();
+        totalSub.textContent = diaryEntries.length ? `${days.toLocaleString()}日分の思い出` : 'まだ日記がありません';
+        monthEl.textContent = monthCount.toLocaleString();
+      } else {
+        totalEl.textContent = '…';
+        totalSub.textContent = mode === 'error' ? '読み込めませんでした' : '読み込み中...';
+        monthEl.textContent = '…';
+      }
+
+      const daysEl = document.getElementById('daysTogetherCount');
+      const subEl = document.getElementById('anniversarySubtext');
+      if (userSettings.anniversaryDate) {
+        const [ay, am, ad] = userSettings.anniversaryDate.split('-').map(Number);
+        const startUtc = Date.UTC(ay, am - 1, ad);
+        const nowUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+        const diffDays = Math.floor((nowUtc - startUtc) / 86400000) + 1; // 当日を1日目とする
+        if (diffDays >= 1) {
+          daysEl.textContent = diffDays.toLocaleString();
+          subEl.textContent = `記念日: ${ay}/${am}/${ad}`;
+        } else {
+          daysEl.textContent = '0';
+          subEl.textContent = `予定日: ${ay}/${am}/${ad}`;
+        }
+      } else {
+        daysEl.textContent = '--';
+        subEl.textContent = 'タップして記念日を設定';
+      }
+    }
+
+    // ---------- カレンダー ----------
+    function renderCalendar() {
+      const grid = document.getElementById('calendarGrid');
+      document.getElementById('calendarMonthYear').textContent = `${currentCalYear}年 ${currentCalMonth + 1}月`;
+      grid.innerHTML = '';
+
+      const firstDay = new Date(currentCalYear, currentCalMonth, 1).getDay();
+      const daysInMonth = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
+      const todayStr = formatDateISO(new Date());
+      const datesWithEntries = new Set(diaryEntries.map(e => e.date));
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'h-11 sm:h-12';
+        grid.appendChild(empty);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${currentCalYear}-${String(currentCalMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isSelected = dateStr === selectedDateStr;
+        const isToday = dateStr === todayStr;
+        const hasEntry = datesWithEntries.has(dateStr);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.onclick = () => window.selectCalendarDate(dateStr);
+
+        let cls = 'h-11 sm:h-12 rounded-2xl flex flex-col items-center justify-center relative transition text-sm font-medium ';
+        if (isSelected) cls += 'bg-roseAccent text-white font-bold shadow-sm scale-[1.03]';
+        else if (isToday) cls += 'bg-roseLight/70 text-roseDark font-bold border border-roseAccent/40';
+        else cls += 'hover:bg-cream text-cocoa';
+        btn.className = cls;
+
+        btn.innerHTML = `
+          <span>${day}</span>
+          ${hasEntry
+            ? `<i class="fa-solid fa-heart text-[9px] mt-0.5 ${isSelected ? 'text-white' : 'text-roseAccent'}"></i>`
+            : '<span class="h-[9px] mt-0.5"></span>'}
+        `;
+        grid.appendChild(btn);
+      }
+    }
+
+    window.changeMonth = function (delta) {
+      currentCalMonth += delta;
+      if (currentCalMonth > 11) { currentCalMonth = 0; currentCalYear++; }
+      else if (currentCalMonth < 0) { currentCalMonth = 11; currentCalYear--; }
+      renderCalendar();
+    };
+
+    window.jumpToToday = function () {
+      const now = new Date();
+      currentCalYear = now.getFullYear();
+      currentCalMonth = now.getMonth();
+      selectedDateStr = formatDateISO(now);
+      renderCalendar();
+      renderSelectedDateCard();
+    };
+
+    window.selectCalendarDate = function (dateStr) {
+      selectedDateStr = dateStr;
+      renderCalendar();
+      renderSelectedDateCard();
+    };
+
+    // ---------- 選択日の日記 ----------
+    function renderSelectedDateCard() {
+      const container = document.getElementById('selectedDateCard');
+      const dayEntries = diaryEntries
+        .filter(e => e.date === selectedDateStr)
+        .sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
+      const formattedDate = formatDateJapanese(selectedDateStr);
+
+      if (dayEntries.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6">
+            <p class="text-xs font-bold text-roseAccent mb-1">${formattedDate}</p>
+            <p class="font-journal text-base font-bold text-cocoa mb-2">この日の日記はまだありません</p>
+            <p class="text-xs text-taupe mb-5">ふたりの出来事や気持ちを記録して残しませんか？</p>
+            <button type="button" data-action="write" data-date="${escapeHtml(selectedDateStr)}" class="px-5 py-2.5 rounded-xl bg-roseLight hover:bg-roseAccent text-roseDark hover:text-white text-xs font-bold transition inline-flex items-center gap-1.5">
+              <i class="fa-solid fa-pen"></i>
+              <span>この日の日記を書く</span>
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-ivory">
+          <div>
+            <span class="text-xs font-bold text-roseAccent block">${formattedDate}</span>
+            <span class="text-[11px] text-taupe">${dayEntries.length}件の思い出</span>
+          </div>
+          <button type="button" data-action="write" data-date="${escapeHtml(selectedDateStr)}" class="px-3 py-1.5 rounded-xl bg-cream hover:bg-roseLight text-cocoa text-xs font-bold transition">
+            <i class="fa-solid fa-plus mr-1 text-roseAccent"></i>追記する
+          </button>
+        </div>
+        <div class="space-y-5">
+          ${dayEntries.map(entry => `
+            <article class="space-y-3">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <span class="inline-block px-2.5 py-0.5 rounded-full bg-roseLight text-roseDark text-[11px] font-bold mb-1.5">
+                    ${getTagEmoji(entry.tag)} ${escapeHtml(entry.tag || '日常')}
+                  </span>
+                  <h3 class="font-journal text-lg font-bold text-cocoa leading-snug break-words">${escapeHtml(entry.title)}</h3>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                  <button type="button" data-action="edit" data-id="${escapeHtml(entry.id)}" class="w-8 h-8 rounded-xl bg-cream hover:bg-ivory text-taupe hover:text-cocoa flex items-center justify-center text-xs transition" title="編集">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button type="button" data-action="delete" data-id="${escapeHtml(entry.id)}" class="w-8 h-8 rounded-xl bg-cream hover:bg-red-50 text-taupe hover:text-red-500 flex items-center justify-center text-xs transition" title="削除">
+                    <i class="fa-regular fa-trash-can"></i>
+                  </button>
+                </div>
+              </div>
+              <p class="text-sm text-cocoa/90 whitespace-pre-wrap break-words leading-relaxed bg-cream/60 p-4 rounded-2xl">${escapeHtml(entry.content)}</p>
+            </article>
+          `).join('<hr class="border-ivory my-4">')}
+        </div>
+      `;
+    }
+
+    // ---------- 検索・一覧 ----------
+    window.setTagFilter = function (tag) {
+      currentTagFilter = tag;
+      document.querySelectorAll('.tag-chip').forEach(btn => {
+        btn.className = btn.dataset.tag === tag
+          ? 'tag-chip active px-3 py-1.5 rounded-full text-xs font-bold bg-roseAccent text-white transition'
+          : 'tag-chip px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition';
+      });
+      renderTimeline();
+    };
+
+    window.handleSearchFilter = function () {
+      const val = document.getElementById('searchInput').value;
+      document.getElementById('clearSearchBtn').classList.toggle('hidden', val.length === 0);
+      renderTimeline();
+    };
+
+    window.clearSearch = function () {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('clearSearchBtn').classList.add('hidden');
+      renderTimeline();
+    };
+
+    function renderTimeline() {
+      const container = document.getElementById('entriesTimeline');
+      const keyword = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+
+      const filtered = diaryEntries.filter(entry => {
+        const matchTag = currentTagFilter === 'すべて' || entry.tag === currentTagFilter;
+        const matchKeyword = !keyword ||
+          (entry.title || '').toLowerCase().includes(keyword) ||
+          (entry.content || '').toLowerCase().includes(keyword) ||
+          (entry.tag || '').toLowerCase().includes(keyword) ||
+          (entry.date || '').includes(keyword);
+        return matchTag && matchKeyword;
+      });
+
+      document.getElementById('filteredCountBadge').textContent = `${filtered.length} 件表示`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 px-4 bg-cream/50 rounded-2xl border border-dashed border-ivory">
+            <i class="fa-regular fa-face-smile text-3xl text-taupe/60 mb-2"></i>
+            <p class="text-sm font-bold text-cocoa mb-1">該当する思い出が見つかりませんでした</p>
+            <p class="text-xs text-taupe">別のキーワードで検索するか、「日記を書く」から新しい思い出を追加しましょう。</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(entry => `
+        <div data-action="jump" data-date="${escapeHtml(entry.date)}" class="cursor-pointer group bg-cream/60 hover:bg-roseLight/30 border border-ivory hover:border-roseAccent/40 rounded-2xl p-4 transition flex gap-3.5 items-start">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white border border-ivory flex items-center justify-center shrink-0 text-roseAccent">
+            <span class="text-xl">${getTagEmoji(entry.tag)}</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="text-[11px] font-bold text-roseDark">${formatDateJapanese(entry.date)}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-white text-taupe border border-ivory shrink-0">${escapeHtml(entry.tag || '日常')}</span>
+            </div>
+            <h4 class="font-journal font-bold text-sm sm:text-base text-cocoa truncate group-hover:text-roseDark transition">${escapeHtml(entry.title)}</h4>
+            <p class="text-xs text-taupe line-clamp-2 mt-1 leading-relaxed">${escapeHtml(entry.content)}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.jumpToEntryDate = function (dateStr) {
+      if (!dateStr) return;
+      const [y, m] = dateStr.split('-').map(Number);
+      currentCalYear = y;
+      currentCalMonth = m - 1;
+      selectedDateStr = dateStr;
+      renderCalendar();
+      renderSelectedDateCard();
+      if (window.innerWidth < 1024) {
+        window.switchMobileTab('calendar');
+        document.getElementById('selectedDateCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    };
+
+    window.switchMobileTab = function (tab) {
+      const calCol = document.getElementById('calendarColumn');
+      const searchCol = document.getElementById('searchColumn');
+      const btnCal = document.getElementById('tabBtnCalendar');
+      const btnSearch = document.getElementById('tabBtnSearch');
+      const on = 'flex-1 py-2 rounded-xl text-xs font-bold bg-white text-roseDark shadow-sm transition';
+      const off = 'flex-1 py-2 rounded-xl text-xs font-bold text-taupe transition';
+
+      if (tab === 'calendar') {
+        calCol.classList.remove('hidden');
+        searchCol.classList.add('hidden');
+        btnCal.className = on;
+        btnSearch.className = off;
+      } else {
+        calCol.classList.add('hidden');
+        searchCol.classList.remove('hidden');
+        btnSearch.className = on;
+        btnCal.className = off;
+      }
+    };
+
+    // ---------- 日記エディタ（自動保存） ----------
+    function setSaveIndicator(state) {
+      const el = document.getElementById('saveIndicator');
+      const map = {
+        idle: ['入力すると自動で保存されます', 'text-taupe'],
+        typing: ['入力中...', 'text-taupe'],
+        saving: ['保存中...', 'text-taupe'],
+        saved: ['自動保存しました ✓', 'text-emerald-600'],
+        waiting: ['接続を待っています...', 'text-amber-600'],
+        error: ['保存できませんでした。もう一度お試しください', 'text-red-500']
+      };
+      const [text, color] = map[state] || map.idle;
+      el.textContent = text;
+      el.className = `text-[11px] ${color}`;
+    }
+
+    function resetEditorForm(dateStr) {
+      document.getElementById('diaryForm').reset();
+      document.getElementById('entryDateInput').value = dateStr;
+      editingId = '';
+      editingCreatedAt = '';
+      editorDirty = false;
+      clearTimeout(autosaveTimer);
+      setSaveIndicator('idle');
+    }
+
+    window.openEditorForDate = function (dateStr) {
+      if (mode === 'cloud' && !spaceId) {
+        showToast('先に合言葉を設定してください', true);
+        openSyncModal(true);
+        return;
+      }
+      const date = (typeof dateStr === 'string' && dateStr) ? dateStr : (selectedDateStr || formatDateISO(new Date()));
+      resetEditorForm(date);
+      document.getElementById('editorModalTitle').textContent = '新しい思い出を記録する';
+      document.getElementById('editorModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('entryTitleInput').focus(), 50);
+    };
+
+    window.editEntry = function (id) {
+      const entry = diaryEntries.find(e => e.id === id);
+      if (!entry) return;
+
+      resetEditorForm(entry.date);
+      editingId = entry.id;
+      editingCreatedAt = entry.createdAt || '';
+      document.getElementById('entryTitleInput').value = entry.title === '（無題）' ? '' : (entry.title || '');
+      document.getElementById('entryContentInput').value = entry.content || '';
+      document.querySelectorAll('input[name="entryTag"]').forEach(r => { r.checked = (r.value === entry.tag); });
+      document.getElementById('editorModalTitle').textContent = '思い出を編集する';
+      document.getElementById('editorModal').classList.remove('hidden');
+    };
+
+    window.handleEditorInput = function () {
+      editorDirty = true;
+      setSaveIndicator('typing');
+      clearTimeout(autosaveTimer);
+      autosaveTimer = setTimeout(() => { persistEditor(); }, 1200);
+    };
+
+    // 戻り値: 'saved' | 'clean' | 'empty' | 'error'
+    async function persistEditor() {
+      clearTimeout(autosaveTimer);
+      if (!editorDirty) return 'clean';
+
+      const date = document.getElementById('entryDateInput').value;
+      const title = document.getElementById('entryTitleInput').value.trim();
+      const content = document.getElementById('entryContentInput').value.trim();
+      if (!date || (!title && !content)) { setSaveIndicator('idle'); return 'empty'; }
+
+      if (!canSave()) {
+        if (mode === 'connecting') {
+          setSaveIndicator('waiting');
+          autosaveTimer = setTimeout(() => { persistEditor(); }, 2000);
+        } else {
+          setSaveIndicator('error');
+        }
+        return 'error';
+      }
+
+      const tagEl = document.querySelector('input[name="entryTag"]:checked');
+      const nowIso = new Date().toISOString();
+      if (!editingId) editingId = newId();
+      if (!editingCreatedAt) editingCreatedAt = nowIso;
+
+      const id = editingId;
+      const payload = {
+        date,
+        title: title || '（無題）',
+        content,
+        tag: tagEl ? tagEl.value : '日常',
+        createdAt: editingCreatedAt,
+        updatedAt: nowIso
+      };
+
+      editorDirty = false;
+      setSaveIndicator('saving');
+      try {
+        await saveEntryData(id, payload);
+        // 保存中にさらに入力があった場合は「入力中」表示のまま
+        if (!editorDirty) {
+          setSaveIndicator('saved');
+          clearTimeout(indicatorTimer);
+          indicatorTimer = setTimeout(() => { if (!editorDirty) setSaveIndicator('idle'); }, 2500);
+        }
+        return 'saved';
+      } catch (err) {
+        console.error('Save entry error:', err);
+        editorDirty = true;
+        setSaveIndicator('error');
+        return 'error';
+      }
+    }
+
+    window.closeEditorModal = async function () {
+      const result = await persistEditor();
+      if (result === 'error') {
+        showToast('まだ保存できていません。通信を確認してください', true);
+        return;
+      }
+      const date = document.getElementById('entryDateInput').value;
+      document.getElementById('editorModal').classList.add('hidden');
+      clearTimeout(autosaveTimer);
+
+      if (result === 'saved' && date) {
+        const [y, m] = date.split('-').map(Number);
+        currentCalYear = y;
+        currentCalMonth = m - 1;
+        selectedDateStr = date;
+        renderCalendar();
+        renderSelectedDateCard();
+        showToast('思い出を保存しました');
+      }
+    };
+
+    // ---------- 削除 ----------
+    window.requestDeleteEntry = function (id) {
+      pendingDeleteId = id;
+      document.getElementById('deleteConfirmModal').classList.remove('hidden');
+    };
+
+    window.closeDeleteModal = function () {
+      pendingDeleteId = null;
+      document.getElementById('deleteConfirmModal').classList.add('hidden');
+    };
+
+    window.confirmDeleteEntry = async function () {
+      if (!pendingDeleteId) return;
+      try {
+        await deleteEntryData(pendingDeleteId);
+        showToast('日記を削除しました');
+      } catch (err) {
+        console.error('Delete error:', err);
+        showToast('削除に失敗しました', true);
+      } finally {
+        window.closeDeleteModal();
+      }
+    };
+
+    // ---------- 設定モーダル ----------
+    window.openSettingsModal = function () {
+      document.getElementById('settingAnniversaryInput').value = userSettings.anniversaryDate || '';
+      document.getElementById('settingPinInput').value = '';
+      document.getElementById('displaySyncCode').textContent = syncCode || '未設定';
+      document.getElementById('syncSection').classList.toggle('hidden', mode === 'local');
+      refreshPinStatus();
+      document.getElementById('settingsModal').classList.remove('hidden');
+    };
+
+    window.closeSettingsModal = function () {
+      document.getElementById('settingsModal').classList.add('hidden');
+    };
+
+    window.saveAnniversary = async function () {
+      const val = document.getElementById('settingAnniversaryInput').value;
+      try {
+        await savePrefs({ anniversaryDate: val });
+        showToast('記念日を保存しました');
+      } catch (err) {
+        console.error('Settings save error:', err);
+        showToast('記念日を保存できませんでした', true);
+      }
+    };
+
+    window.copySyncCode = function () {
+      if (!syncCode) { showToast('合言葉がまだ設定されていません', true); return; }
+      copyText(syncCode, '合言葉をコピーしました');
+    };
+
+    // ---------- 合言葉モーダル ----------
+    window.openSyncModal = function (required) {
+      document.getElementById('syncCodeInput').value = '';
+      document.getElementById('syncCancelBtn').classList.toggle('hidden', !!required || !syncCode);
+      document.getElementById('syncModalWarn').classList.toggle('hidden', !syncCode);
+      document.getElementById('syncModal').classList.remove('hidden');
+    };
+
+    window.closeSyncModal = function () {
+      document.getElementById('syncModal').classList.add('hidden');
+    };
+
+    window.generateSyncCode = function () {
+      const chars = 'abcdefghjkmnpqrstuvwxyz23456789'; // 紛らわしい文字を除外
+      const bytes = new Uint8Array(12);
+      if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+      else for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+      const raw = Array.from(bytes).map(b => chars[b % chars.length]).join('');
+      document.getElementById('syncCodeInput').value = `${raw.slice(0, 4)}-${raw.slice(4, 8)}-${raw.slice(8, 12)}`;
+    };
+
+    window.submitSyncCode = async function () {
+      const raw = document.getElementById('syncCodeInput').value.trim();
+      if (normalizeCode(raw).length < 8) {
+        showToast('合言葉は8文字以上で入力してください', true);
+        return;
+      }
+      syncCode = raw;
+      lsSet(LS.code, raw);
+      window.closeSyncModal();
+      if (mode === 'cloud') {
+        await startCloudSync();
+        document.getElementById('displaySyncCode').textContent = syncCode;
+        showToast('合言葉を設定しました。もう一台にも同じ合言葉を入力してください');
+      }
+    };
+
+    // ---------- クリック委譲（日記カードのボタン類） ----------
+    document.addEventListener('click', (e) => {
+      const el = e.target.closest('[data-action]');
+      if (!el) return;
+      const { action, id, date } = el.dataset;
+      if (action === 'edit') window.editEntry(id);
+      else if (action === 'delete') window.requestDeleteEntry(id);
+      else if (action === 'write') window.openEditorForDate(date);
+      else if (action === 'jump') window.jumpToEntryDate(date);
+    });
+
+    // ---------- 描画・起動 ----------
+    function renderAll() {
+      updateStatsDashboard();
+      renderCalendar();
+      renderSelectedDateCard();
+      renderTimeline();
+    }
+
+    (function boot() {
+      const now = new Date();
+      currentCalYear = now.getFullYear();
+      currentCalMonth = now.getMonth();
+      selectedDateStr = formatDateISO(now);
+
+      syncCode = lsGet(LS.code) || '';
+      pinHash = lsGet(LS.pin) || '';
+      if (pinHash) showLock();
+
+      renderAll();
+      initFirebase();
+    })();
+  </script>
+</body>
+</html>
