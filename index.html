@@ -448,9 +448,24 @@
     <span id="toastMessage">保存しました</span>
   </div>
 
+  <!-- ==================== Firebase 接続設定 ==================== -->
+  <script>
+    window.__firebase_config = JSON.stringify({
+      apiKey: "AIzaSyC1pkKvIygVLO1tgVZ9cXXsU55bOa24658",
+      authDomain: "memory-diary-efc1e.firebaseapp.com",
+      projectId: "memory-diary-efc1e",
+      storageBucket: "memory-diary-efc1e.firebasestorage.app",
+      messagingSenderId: "226073529352",
+      appId: "1:226073529352:web:da1a8360577ffaabfc95bd"
+    });
+  </script>
+
   <!-- ==================== アプリケーションロジック ==================== -->
   <script type="module">
     // ---------- 設定 ----------
+    const firebaseConfigText = (typeof __firebase_config !== 'undefined')
+      ? __firebase_config
+      : (window.__firebase_config || '');
     const appId = (typeof __app_id !== 'undefined' ? String(__app_id) : 'memory-diary-default').replace(/[\/\s]/g, '_');
     const LS = {
       code: 'memoryDiary.syncCode',
@@ -705,7 +720,7 @@
     }
 
     async function initFirebase() {
-      if (typeof __firebase_config === 'undefined') {
+      if (!firebaseConfigText) {
         startLocalMode();
         return;
       }
@@ -718,7 +733,7 @@
           import(base + 'firebase-firestore.js')
         ]);
         fs = fsMod;
-        const app = appMod.initializeApp(JSON.parse(__firebase_config));
+        const app = appMod.initializeApp(JSON.parse(firebaseConfigText));
         db = fsMod.getFirestore(app);
         auth = authMod.getAuth(app);
 
