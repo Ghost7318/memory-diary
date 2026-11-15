@@ -2,8 +2,13 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#FAF8F5">
   <title>ふたりの思い出日記 - Memory Diary</title>
+
+  <!-- ファビコン（💕）：SVG版。PNG版（Safari・iPhoneホーム画面用）はJSで追加します -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%95%3C/text%3E%3C/svg%3E">
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
@@ -35,6 +40,7 @@
     }
   </script>
   <style>
+    html { -webkit-text-size-adjust: 100%; }
     body {
       background-color: #FAF8F5;
       color: #4A3F3B;
@@ -57,6 +63,32 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+    }
+    .cal-select {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238C7E78' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+
+    /* ---- スマホ向けの調整 ---- */
+    .modal-panel { max-height: 92vh; max-height: 92dvh; }
+    .safe-bottom { padding-bottom: calc(1.25rem + env(safe-area-inset-bottom)); }
+    .page-bottom { padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); }
+    .safe-top { padding-top: env(safe-area-inset-top); }
+    #toastNotification { bottom: calc(1.25rem + env(safe-area-inset-bottom)); }
+    .no-scrollbar { scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    @media (max-width: 639px) {
+      /* iPhoneで入力欄を押したときに画面が拡大されるのを防ぐ */
+      input, select, textarea { font-size: 16px !important; }
+      input[type="date"] {
+        -webkit-appearance: none;
+        appearance: none;
+        min-height: 2.75rem;
+        text-align: left;
+      }
     }
   </style>
 </head>
@@ -99,27 +131,27 @@
   </div>
 
   <!-- ==================== 2. ヘッダー ==================== -->
-  <header class="bg-white/90 backdrop-blur-sm border-b border-ivory sticky top-0 z-30">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-roseAccent to-roseDark text-white flex items-center justify-center shadow-sm">
-          <i class="fa-solid fa-heart text-lg"></i>
+  <header class="bg-white/90 backdrop-blur-sm border-b border-ivory sticky top-0 z-30 safe-top">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-2xl bg-gradient-to-br from-roseAccent to-roseDark text-white flex items-center justify-center shadow-sm">
+          <i class="fa-solid fa-heart text-base sm:text-lg"></i>
         </div>
-        <div>
-          <h1 class="font-journal text-lg sm:text-xl font-bold tracking-wide text-cocoa leading-tight">ふたりの思い出日記</h1>
-          <p class="text-[11px] text-taupe flex items-center gap-1.5">
-            <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
-            <span id="syncStatusText">準備中...</span>
+        <div class="min-w-0">
+          <h1 class="font-journal text-base sm:text-xl font-bold tracking-wide text-cocoa leading-tight truncate">ふたりの思い出日記</h1>
+          <p class="text-[10px] sm:text-[11px] text-taupe flex items-center gap-1.5 min-w-0">
+            <span id="syncStatusDot" class="w-2 h-2 shrink-0 rounded-full bg-amber-400 inline-block"></span>
+            <span id="syncStatusText" class="truncate">準備中...</span>
           </p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <button type="button" onclick="openSettingsModal()" class="p-2.5 sm:px-3.5 sm:py-2 rounded-xl bg-cream hover:bg-ivory text-cocoa text-xs sm:text-sm font-medium transition flex items-center gap-1.5 border border-ivory" title="設定">
+      <div class="flex items-center gap-2 shrink-0">
+        <button type="button" onclick="openSettingsModal()" class="w-10 h-10 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-xl bg-cream hover:bg-ivory text-cocoa text-sm font-medium transition flex items-center justify-center gap-1.5 border border-ivory" title="設定" aria-label="設定">
           <i class="fa-solid fa-gear text-taupe"></i>
           <span class="hidden sm:inline">設定・ロック</span>
         </button>
-        <button type="button" onclick="openEditorForDate()" class="px-4 py-2.5 rounded-xl bg-roseAccent hover:bg-roseDark active:scale-95 text-white text-xs sm:text-sm font-bold shadow-sm transition flex items-center gap-1.5">
+        <button type="button" onclick="openEditorForDate()" class="h-10 sm:h-auto px-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-roseAccent hover:bg-roseDark active:scale-95 text-white text-xs sm:text-sm font-bold shadow-sm transition flex items-center gap-1.5 whitespace-nowrap">
           <i class="fa-solid fa-pen-nib"></i>
           <span>日記を書く</span>
         </button>
@@ -128,82 +160,87 @@
   </header>
 
   <!-- ==================== 3. メインコンテンツ ==================== -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-4 sm:pt-6 page-bottom space-y-4 sm:space-y-6">
 
     <!-- 統計カード -->
-    <section class="grid grid-cols-3 gap-3 sm:gap-5">
-      <div onclick="openSettingsModal()" class="cursor-pointer bg-white rounded-2xl p-3.5 sm:p-5 border border-ivory shadow-sm hover:border-roseAccent/50 transition relative overflow-hidden group">
+    <section class="grid grid-cols-3 gap-2 sm:gap-5">
+      <div onclick="openSettingsModal()" class="cursor-pointer bg-white rounded-2xl p-3 sm:p-5 border border-ivory shadow-sm hover:border-roseAccent/50 transition relative overflow-hidden group">
         <div class="absolute -right-3 -bottom-3 text-roseLight/70 text-5xl sm:text-6xl pointer-events-none group-hover:scale-110 transition-transform">
           <i class="fa-solid fa-heart"></i>
         </div>
-        <p class="text-[11px] sm:text-xs font-medium text-taupe mb-1 flex items-center gap-1">
-          <i class="fa-solid fa-calendar-days text-roseAccent"></i>
+        <p class="text-[10px] sm:text-xs font-medium text-taupe mb-1 flex items-center gap-1 whitespace-nowrap">
+          <i class="fa-solid fa-calendar-days text-roseAccent hidden sm:inline"></i>
           <span>一緒になって</span>
         </p>
-        <div class="relative z-10">
-          <span class="text-xl sm:text-3xl font-bold font-journal text-roseDark" id="daysTogetherCount">--</span>
-          <span class="text-xs sm:text-sm text-cocoa ml-0.5">日目</span>
+        <div class="relative z-10 whitespace-nowrap">
+          <span class="text-lg sm:text-3xl font-bold font-journal text-roseDark" id="daysTogetherCount">--</span>
+          <span class="text-[10px] sm:text-sm text-cocoa ml-0.5">日目</span>
         </div>
-        <p id="anniversarySubtext" class="text-[10px] sm:text-xs text-taupe mt-1 truncate">タップして記念日を設定</p>
+        <p id="anniversarySubtext" class="text-[10px] sm:text-xs text-taupe mt-1 leading-tight sm:truncate">タップして記念日を設定</p>
       </div>
 
-      <div class="bg-white rounded-2xl p-3.5 sm:p-5 border border-ivory shadow-sm relative overflow-hidden">
+      <div class="bg-white rounded-2xl p-3 sm:p-5 border border-ivory shadow-sm relative overflow-hidden">
         <div class="absolute -right-2 -bottom-3 text-ivory text-5xl sm:text-6xl pointer-events-none">
           <i class="fa-solid fa-book-open"></i>
         </div>
-        <p class="text-[11px] sm:text-xs font-medium text-taupe mb-1 flex items-center gap-1">
-          <i class="fa-solid fa-bookmark text-roseAccent"></i>
-          <span>これまでの日記</span>
+        <p class="text-[10px] sm:text-xs font-medium text-taupe mb-1 flex items-center gap-1 whitespace-nowrap">
+          <i class="fa-solid fa-bookmark text-roseAccent hidden sm:inline"></i>
+          <span class="sm:hidden">日記の数</span>
+          <span class="hidden sm:inline">これまでの日記</span>
         </p>
-        <div class="relative z-10">
-          <span id="totalEntriesCount" class="text-xl sm:text-3xl font-bold font-journal text-cocoa">…</span>
-          <span class="text-xs sm:text-sm text-cocoa ml-0.5">ページ</span>
+        <div class="relative z-10 whitespace-nowrap">
+          <span id="totalEntriesCount" class="text-lg sm:text-3xl font-bold font-journal text-cocoa">…</span>
+          <span class="text-[10px] sm:text-sm text-cocoa ml-0.5">ページ</span>
         </div>
-        <p id="totalEntriesSubtext" class="text-[10px] sm:text-xs text-taupe mt-1 truncate">読み込み中...</p>
+        <p id="totalEntriesSubtext" class="text-[10px] sm:text-xs text-taupe mt-1 leading-tight sm:truncate">読み込み中...</p>
       </div>
 
-      <div class="bg-white rounded-2xl p-3.5 sm:p-5 border border-ivory shadow-sm relative overflow-hidden">
+      <div class="bg-white rounded-2xl p-3 sm:p-5 border border-ivory shadow-sm relative overflow-hidden">
         <div class="absolute -right-2 -bottom-3 text-ivory text-5xl sm:text-6xl pointer-events-none">
           <i class="fa-solid fa-star"></i>
         </div>
-        <p class="text-[11px] sm:text-xs font-medium text-taupe mb-1 flex items-center gap-1">
-          <i class="fa-regular fa-calendar-check text-roseAccent"></i>
+        <p class="text-[10px] sm:text-xs font-medium text-taupe mb-1 flex items-center gap-1 whitespace-nowrap">
+          <i class="fa-regular fa-calendar-check text-roseAccent hidden sm:inline"></i>
           <span id="currentMonthLabel">今月の記録</span>
         </p>
-        <div class="relative z-10">
-          <span id="monthEntriesCount" class="text-xl sm:text-3xl font-bold font-journal text-cocoa">…</span>
-          <span class="text-xs sm:text-sm text-cocoa ml-0.5">件</span>
+        <div class="relative z-10 whitespace-nowrap">
+          <span id="monthEntriesCount" class="text-lg sm:text-3xl font-bold font-journal text-cocoa">…</span>
+          <span class="text-[10px] sm:text-sm text-cocoa ml-0.5">件</span>
         </div>
-        <p class="text-[10px] sm:text-xs text-taupe mt-1 truncate">今月書いた日記の数</p>
+        <p class="text-[10px] sm:text-xs text-taupe mt-1 leading-tight sm:truncate">今月書いた日記の数</p>
       </div>
     </section>
 
     <!-- モバイル用タブ -->
     <div class="flex lg:hidden bg-ivory p-1 rounded-2xl">
-      <button type="button" id="tabBtnCalendar" onclick="switchMobileTab('calendar')" class="flex-1 py-2 rounded-xl text-xs font-bold bg-white text-roseDark shadow-sm transition">
+      <button type="button" id="tabBtnCalendar" onclick="switchMobileTab('calendar')" class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-white text-roseDark shadow-sm transition">
         <i class="fa-regular fa-calendar mr-1"></i>カレンダー振り返り
       </button>
-      <button type="button" id="tabBtnSearch" onclick="switchMobileTab('search')" class="flex-1 py-2 rounded-xl text-xs font-bold text-taupe transition">
+      <button type="button" id="tabBtnSearch" onclick="switchMobileTab('search')" class="flex-1 py-2.5 rounded-xl text-xs font-bold text-taupe transition">
         <i class="fa-solid fa-magnifying-glass mr-1"></i>思い出一覧・検索
       </button>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
 
       <!-- 左カラム -->
-      <div id="calendarColumn" class="lg:col-span-6 space-y-5 lg:block">
-        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-ivory shadow-sm">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2">
-              <button type="button" onclick="changeMonth(-1)" class="w-9 h-9 rounded-xl bg-cream hover:bg-roseLight text-cocoa flex items-center justify-center transition" aria-label="前月">
+      <div id="calendarColumn" class="lg:col-span-6 space-y-4 sm:space-y-5 lg:block">
+        <div class="bg-white rounded-3xl p-4 sm:p-6 border border-ivory shadow-sm">
+          <!-- カレンダーヘッダー：スマホでは「前月 / 年・月 / 翌月」を1行に -->
+          <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <div class="flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-start">
+              <button type="button" onclick="changeMonth(-1)" class="w-10 h-10 sm:w-9 sm:h-9 rounded-xl bg-cream hover:bg-roseLight text-cocoa flex items-center justify-center transition shrink-0" aria-label="前月">
                 <i class="fa-solid fa-chevron-left text-xs"></i>
               </button>
-              <h2 id="calendarMonthYear" class="font-journal text-lg sm:text-xl font-bold text-cocoa min-w-[130px] text-center">----年 --月</h2>
-              <button type="button" onclick="changeMonth(1)" class="w-9 h-9 rounded-xl bg-cream hover:bg-roseLight text-cocoa flex items-center justify-center transition" aria-label="翌月">
+              <div class="flex items-center gap-1.5">
+                <select id="calYearSelect" onchange="onCalendarPick()" aria-label="年を選ぶ" class="cal-select font-journal font-bold text-base text-cocoa bg-cream hover:bg-roseLight/60 border border-ivory focus:border-roseAccent focus:outline-none rounded-xl h-10 sm:h-9 pl-2.5 pr-6 cursor-pointer transition"></select>
+                <select id="calMonthSelect" onchange="onCalendarPick()" aria-label="月を選ぶ" class="cal-select font-journal font-bold text-base text-cocoa bg-cream hover:bg-roseLight/60 border border-ivory focus:border-roseAccent focus:outline-none rounded-xl h-10 sm:h-9 pl-2.5 pr-6 cursor-pointer transition"></select>
+              </div>
+              <button type="button" onclick="changeMonth(1)" class="w-10 h-10 sm:w-9 sm:h-9 rounded-xl bg-cream hover:bg-roseLight text-cocoa flex items-center justify-center transition shrink-0" aria-label="翌月">
                 <i class="fa-solid fa-chevron-right text-xs"></i>
               </button>
             </div>
-            <button type="button" onclick="jumpToToday()" class="px-3 py-1.5 rounded-xl bg-roseLight/70 hover:bg-roseLight text-roseDark text-xs font-bold transition">今日へ</button>
+            <button type="button" onclick="jumpToToday()" class="hidden sm:block px-3 py-1.5 rounded-xl bg-roseLight/70 hover:bg-roseLight text-roseDark text-xs font-bold transition whitespace-nowrap">今日へ</button>
           </div>
 
           <div class="grid grid-cols-7 text-center text-xs font-bold text-taupe mb-2">
@@ -218,33 +255,37 @@
 
           <div id="calendarGrid" class="grid grid-cols-7 gap-1 sm:gap-1.5"></div>
 
-          <div class="mt-4 pt-3 border-t border-ivory flex items-center justify-between text-[11px] text-taupe">
-            <span class="flex items-center gap-1.5"><i class="fa-solid fa-heart text-roseAccent"></i> 日記がある日</span>
-            <span>日付をタップして閲覧・記入</span>
+          <div class="mt-3 sm:mt-4 pt-3 border-t border-ivory flex items-center justify-between gap-2 text-[11px] text-taupe">
+            <span class="flex items-center gap-1.5 min-w-0">
+              <i class="fa-solid fa-heart text-roseAccent shrink-0"></i>
+              <span class="truncate">日記がある日<span class="sm:hidden"> ・ スワイプで月移動</span></span>
+            </span>
+            <button type="button" onclick="jumpToToday()" class="sm:hidden shrink-0 px-3 py-1.5 rounded-xl bg-roseLight/70 hover:bg-roseLight text-roseDark text-xs font-bold transition whitespace-nowrap">今日へ</button>
+            <span class="hidden sm:inline text-right">タップで閲覧・記入 ／ スワイプで月移動</span>
           </div>
         </div>
 
-        <div id="selectedDateCard" class="bg-white rounded-3xl p-5 sm:p-6 border border-ivory shadow-sm transition"></div>
+        <div id="selectedDateCard" class="bg-white rounded-3xl p-4 sm:p-6 border border-ivory shadow-sm transition"></div>
       </div>
 
       <!-- 右カラム -->
-      <div id="searchColumn" class="lg:col-span-6 space-y-5 hidden lg:block">
-        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-ivory shadow-sm">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="font-journal text-lg font-bold text-cocoa flex items-center gap-2">
+      <div id="searchColumn" class="lg:col-span-6 space-y-4 sm:space-y-5 hidden lg:block">
+        <div class="bg-white rounded-3xl p-4 sm:p-6 border border-ivory shadow-sm">
+          <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 class="font-journal text-base sm:text-lg font-bold text-cocoa flex items-center gap-2">
               <i class="fa-solid fa-magnifying-glass text-roseAccent text-base"></i>
               <span>思い出を探す・一覧</span>
             </h2>
-            <span id="filteredCountBadge" class="text-xs font-medium bg-cream text-taupe px-2.5 py-1 rounded-full">0 件表示</span>
+            <span id="filteredCountBadge" class="text-xs font-medium bg-cream text-taupe px-2.5 py-1 rounded-full whitespace-nowrap">0 件表示</span>
           </div>
 
-          <div class="relative mb-3.5">
+          <div class="relative mb-3">
             <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-taupe text-sm"></i>
             <input
               type="text"
               id="searchInput"
               oninput="handleSearchFilter()"
-              placeholder="キーワードで検索（例：水族館、誕生日、カフェ...）"
+              placeholder="キーワードで検索"
               class="w-full pl-10 pr-10 py-3 rounded-2xl bg-cream border border-ivory focus:border-roseAccent focus:bg-white focus:outline-none text-sm text-cocoa placeholder-taupe/70 transition"
             >
             <button type="button" id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-ivory text-taupe hover:text-cocoa flex items-center justify-center text-xs" aria-label="検索をクリア">
@@ -252,16 +293,18 @@
             </button>
           </div>
 
-          <div id="filterTagsContainer" class="flex flex-wrap gap-1.5 mb-5">
-            <button type="button" onclick="setTagFilter('すべて')" data-tag="すべて" class="tag-chip active px-3 py-1.5 rounded-full text-xs font-bold bg-roseAccent text-white transition">すべて</button>
-            <button type="button" onclick="setTagFilter('デート')" data-tag="デート" class="tag-chip px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">💕 デート</button>
-            <button type="button" onclick="setTagFilter('記念日')" data-tag="記念日" class="tag-chip px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">🎂 記念日</button>
-            <button type="button" onclick="setTagFilter('旅行')" data-tag="旅行" class="tag-chip px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">✈️ 旅行</button>
-            <button type="button" onclick="setTagFilter('幸せ')" data-tag="幸せ" class="tag-chip px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">🥰 幸せ</button>
-            <button type="button" onclick="setTagFilter('日常')" data-tag="日常" class="tag-chip px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">☕ 日常</button>
+          <!-- タグ絞り込み：スマホでは横にスワイプ -->
+          <div id="filterTagsContainer" class="flex gap-1.5 mb-4 sm:mb-5 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1 sm:flex-wrap sm:overflow-visible">
+            <button type="button" onclick="setTagFilter('すべて')" data-tag="すべて" class="tag-chip active shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold bg-roseAccent text-white transition">すべて</button>
+            <button type="button" onclick="setTagFilter('デート')" data-tag="デート" class="tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">💕 デート</button>
+            <button type="button" onclick="setTagFilter('記念日')" data-tag="記念日" class="tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">🎂 記念日</button>
+            <button type="button" onclick="setTagFilter('旅行')" data-tag="旅行" class="tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">✈️ 旅行</button>
+            <button type="button" onclick="setTagFilter('幸せ')" data-tag="幸せ" class="tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">🥰 幸せ</button>
+            <button type="button" onclick="setTagFilter('日常')" data-tag="日常" class="tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">☕ 日常</button>
           </div>
 
-          <div id="entriesTimeline" class="space-y-3 max-h-[600px] overflow-y-auto pr-1"></div>
+          <!-- スマホではページ全体でスクロール、PCは枠内スクロール -->
+          <div id="entriesTimeline" class="space-y-3 lg:max-h-[600px] lg:overflow-y-auto lg:pr-1"></div>
         </div>
       </div>
 
@@ -269,27 +312,27 @@
   </main>
 
   <!-- ==================== 4. 日記作成・編集モーダル（自動保存） ==================== -->
-  <div id="editorModal" class="fixed inset-0 z-40 bg-cocoa/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-ivory overflow-hidden flex flex-col max-h-[92vh]">
-      <div class="px-6 py-4 bg-cream border-b border-ivory flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <span class="w-8 h-8 rounded-xl bg-roseLight text-roseAccent flex items-center justify-center text-sm">
+  <div id="editorModal" class="fixed inset-0 z-40 bg-cocoa/40 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 hidden">
+    <div class="modal-panel bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl border border-ivory overflow-hidden flex flex-col">
+      <div class="px-5 sm:px-6 py-3.5 sm:py-4 bg-cream border-b border-ivory flex items-center justify-between">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="w-8 h-8 shrink-0 rounded-xl bg-roseLight text-roseAccent flex items-center justify-center text-sm">
             <i class="fa-solid fa-feather-pointed"></i>
           </span>
-          <div>
-            <h3 id="editorModalTitle" class="font-journal text-lg font-bold text-cocoa leading-tight">思い出を記録する</h3>
-            <p id="saveIndicator" class="text-[11px] text-taupe">入力すると自動で保存されます</p>
+          <div class="min-w-0">
+            <h3 id="editorModalTitle" class="font-journal text-base sm:text-lg font-bold text-cocoa leading-tight truncate">思い出を記録する</h3>
+            <p id="saveIndicator" class="text-[11px] text-taupe truncate">入力すると自動で保存されます</p>
           </div>
         </div>
-        <button type="button" onclick="closeEditorModal()" class="w-8 h-8 rounded-full hover:bg-ivory text-taupe flex items-center justify-center transition" aria-label="閉じる">
+        <button type="button" onclick="closeEditorModal()" class="w-9 h-9 shrink-0 rounded-full hover:bg-ivory text-taupe flex items-center justify-center transition" aria-label="閉じる">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <form id="diaryForm" onsubmit="event.preventDefault(); closeEditorModal();" oninput="handleEditorInput()" onchange="handleEditorInput()" class="p-6 overflow-y-auto space-y-4">
+      <form id="diaryForm" onsubmit="event.preventDefault(); closeEditorModal();" oninput="handleEditorInput()" onchange="handleEditorInput()" class="p-5 sm:p-6 safe-bottom sm:pb-6 overflow-y-auto overscroll-contain space-y-4">
         <div>
-          <label class="block text-xs font-bold text-taupe mb-1.5">日付</label>
-          <input type="date" id="entryDateInput" required class="w-full px-4 py-2.5 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:bg-white focus:outline-none text-sm text-cocoa font-medium">
+          <label class="block text-xs font-bold text-taupe mb-1.5">日付（2000年〜2100年）</label>
+          <input type="date" id="entryDateInput" required min="2000-01-01" max="2100-12-31" class="w-full px-4 py-2.5 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:bg-white focus:outline-none text-sm text-cocoa font-medium">
         </div>
 
         <div>
@@ -339,26 +382,26 @@
   </div>
 
   <!-- ==================== 5. 設定モーダル ==================== -->
-  <div id="settingsModal" class="fixed inset-0 z-40 bg-cocoa/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-ivory overflow-hidden max-h-[92vh] flex flex-col">
-      <div class="px-6 py-4 bg-cream border-b border-ivory flex items-center justify-between">
-        <h3 class="font-journal text-lg font-bold text-cocoa flex items-center gap-2">
+  <div id="settingsModal" class="fixed inset-0 z-40 bg-cocoa/40 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 hidden">
+    <div class="modal-panel bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl border border-ivory overflow-hidden flex flex-col">
+      <div class="px-5 sm:px-6 py-3.5 sm:py-4 bg-cream border-b border-ivory flex items-center justify-between">
+        <h3 class="font-journal text-base sm:text-lg font-bold text-cocoa flex items-center gap-2 min-w-0">
           <i class="fa-solid fa-sliders text-roseAccent"></i>
-          <span>記念日・共有・ロック設定</span>
+          <span class="truncate">記念日・共有・ロック設定</span>
         </h3>
-        <button type="button" onclick="closeSettingsModal()" class="w-8 h-8 rounded-full hover:bg-ivory text-taupe flex items-center justify-center transition" aria-label="閉じる">
+        <button type="button" onclick="closeSettingsModal()" class="w-9 h-9 shrink-0 rounded-full hover:bg-ivory text-taupe flex items-center justify-center transition" aria-label="閉じる">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <div class="p-6 space-y-5 overflow-y-auto">
+      <div class="p-5 sm:p-6 safe-bottom sm:pb-6 space-y-5 overflow-y-auto overscroll-contain">
         <!-- 記念日 -->
         <div>
           <label class="block text-xs font-bold text-cocoa mb-1">
             <i class="fa-solid fa-heart text-roseAccent mr-1"></i>付き合った記念日
           </label>
           <p class="text-[11px] text-taupe mb-2">設定すると「一緒になって〇〇日目」が自動計算されます（変更は自動で保存されます）。</p>
-          <input type="date" id="settingAnniversaryInput" onchange="saveAnniversary()" class="w-full px-4 py-2.5 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:outline-none text-sm text-cocoa">
+          <input type="date" id="settingAnniversaryInput" min="2000-01-01" max="2100-12-31" onchange="saveAnniversary()" class="w-full px-4 py-2.5 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:outline-none text-sm text-cocoa">
         </div>
 
         <hr class="border-ivory">
@@ -372,10 +415,27 @@
             別の端末でこの合言葉を入力すると、同じ日記を見たり書いたりできます。合言葉を知っている人は日記を読めるので、ふたり以外には教えないでください。
           </p>
           <div class="flex items-center gap-2">
-            <code id="displaySyncCode" class="flex-1 text-xs bg-cream px-3 py-2 rounded-lg border border-ivory text-cocoa truncate tracking-wide">未設定</code>
-            <button type="button" onclick="copySyncCode()" class="px-3 py-2 rounded-lg bg-ivory hover:bg-roseLight text-cocoa text-xs font-medium transition">コピー</button>
+            <code id="displaySyncCode" class="flex-1 min-w-0 text-xs bg-cream px-3 py-2.5 rounded-lg border border-ivory text-cocoa truncate tracking-wide">未設定</code>
+            <button type="button" onclick="copySyncCode()" class="px-3 py-2.5 rounded-lg bg-ivory hover:bg-roseLight text-cocoa text-xs font-medium transition whitespace-nowrap">コピー</button>
           </div>
           <button type="button" onclick="openSyncModal(false)" class="mt-2 text-[11px] text-roseDark hover:underline">合言葉を入力・変更する</button>
+        </div>
+
+        <hr class="border-ivory">
+
+        <!-- バックアップ -->
+        <div>
+          <label class="block text-xs font-bold text-cocoa mb-1">
+            <i class="fa-solid fa-download text-roseAccent mr-1"></i>バックアップ（テキストで書き出し）
+          </label>
+          <p class="text-[11px] text-taupe mb-2 leading-relaxed">
+            日付・項目・タイトル・本文を、日付の古い順にまとめたテキストファイル（.txt）として保存します。万が一に備えて、ときどき保存しておくと安心です。
+          </p>
+          <p id="storageUsageText" class="text-[11px] text-taupe bg-cream border border-ivory rounded-lg px-3 py-2 mb-2">読み込み中...</p>
+          <button type="button" onclick="exportBackup()" class="w-full py-3 rounded-xl bg-roseLight hover:bg-roseAccent text-roseDark hover:text-white text-sm font-bold transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-file-lines"></i>
+            <span>日記をテキストファイルに書き出す</span>
+          </button>
         </div>
 
         <hr class="border-ivory">
@@ -393,21 +453,21 @@
           </div>
         </div>
 
-        <button type="button" onclick="closeSettingsModal()" class="w-full py-2.5 rounded-xl bg-ivory hover:bg-ivory/80 text-cocoa text-sm font-bold transition">閉じる</button>
+        <button type="button" onclick="closeSettingsModal()" class="w-full py-3 rounded-xl bg-ivory hover:bg-ivory/80 text-cocoa text-sm font-bold transition">閉じる</button>
       </div>
     </div>
   </div>
 
   <!-- ==================== 6. 合言葉入力モーダル ==================== -->
-  <div id="syncModal" class="fixed inset-0 z-[45] bg-cocoa/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-ivory overflow-hidden">
-      <div class="px-6 py-4 bg-cream border-b border-ivory">
-        <h3 class="font-journal text-lg font-bold text-cocoa flex items-center gap-2">
+  <div id="syncModal" class="fixed inset-0 z-[45] bg-cocoa/40 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 hidden">
+    <div class="modal-panel bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl border border-ivory overflow-hidden flex flex-col">
+      <div class="px-5 sm:px-6 py-3.5 sm:py-4 bg-cream border-b border-ivory">
+        <h3 class="font-journal text-base sm:text-lg font-bold text-cocoa flex items-center gap-2">
           <i class="fa-solid fa-key text-roseAccent"></i>
           <span>ふたりの合言葉</span>
         </h3>
       </div>
-      <div class="p-6 space-y-4">
+      <div class="p-5 sm:p-6 safe-bottom sm:pb-6 space-y-4 overflow-y-auto overscroll-contain">
         <p class="text-xs text-taupe leading-relaxed">
           スマホとパソコンの<b class="text-cocoa">両方で同じ合言葉</b>を入力すると、日記が自動で共有されます。
           最初の1台目は「ランダムに作る」がおすすめです。2台目ではその合言葉を入力してください。
@@ -420,8 +480,8 @@
           別の合言葉に切り替えると、今の日記は表示されなくなります（元の合言葉に戻せばまた見られます）。
         </p>
         <div class="flex items-center gap-3">
-          <button type="button" id="syncCancelBtn" onclick="closeSyncModal()" class="flex-1 py-2.5 rounded-xl bg-ivory text-cocoa text-sm font-bold transition">キャンセル</button>
-          <button type="button" onclick="submitSyncCode()" class="flex-1 py-2.5 rounded-xl bg-roseAccent hover:bg-roseDark text-white text-sm font-bold shadow-sm transition">この合言葉で始める</button>
+          <button type="button" id="syncCancelBtn" onclick="closeSyncModal()" class="flex-1 py-3 rounded-xl bg-ivory text-cocoa text-sm font-bold transition">キャンセル</button>
+          <button type="button" onclick="submitSyncCode()" class="flex-1 py-3 rounded-xl bg-roseAccent hover:bg-roseDark text-white text-sm font-bold shadow-sm transition">この合言葉で始める</button>
         </div>
       </div>
     </div>
@@ -436,15 +496,15 @@
       <h4 class="font-journal text-base font-bold text-cocoa mb-1">この日記を削除しますか？</h4>
       <p class="text-xs text-taupe mb-5">削除した思い出は元に戻せません。</p>
       <div class="flex gap-2.5">
-        <button type="button" onclick="closeDeleteModal()" class="flex-1 py-2.5 rounded-xl bg-ivory text-cocoa text-xs font-bold">やめる</button>
-        <button type="button" onclick="confirmDeleteEntry()" class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold shadow-sm">削除する</button>
+        <button type="button" onclick="closeDeleteModal()" class="flex-1 py-3 rounded-xl bg-ivory text-cocoa text-xs font-bold">やめる</button>
+        <button type="button" onclick="confirmDeleteEntry()" class="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold shadow-sm">削除する</button>
       </div>
     </div>
   </div>
 
   <!-- ==================== 8. トースト ==================== -->
-  <div id="toastNotification" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] bg-cocoa text-white px-5 py-3 rounded-full shadow-lg text-xs font-medium flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 max-w-[90vw]">
-    <i id="toastIcon" class="fa-solid fa-heart text-roseAccent"></i>
+  <div id="toastNotification" class="fixed left-1/2 -translate-x-1/2 z-[60] bg-cocoa text-white px-5 py-3 rounded-full shadow-lg text-xs font-medium flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 max-w-[90vw]">
+    <i id="toastIcon" class="fa-solid fa-heart text-roseAccent shrink-0"></i>
     <span id="toastMessage">保存しました</span>
   </div>
 
@@ -463,6 +523,7 @@
   <!-- ==================== アプリケーションロジック ==================== -->
   <script type="module">
     // ---------- 設定 ----------
+    // ※ appId・合言葉から作る保存先(spaceId)・コレクション名は、変更すると今の日記が見えなくなります。
     const firebaseConfigText = (typeof __firebase_config !== 'undefined')
       ? __firebase_config
       : (window.__firebase_config || '');
@@ -473,6 +534,20 @@
       entries: 'memoryDiary.local.entries',
       prefs: 'memoryDiary.local.prefs'
     };
+
+    // 日付の範囲（カレンダー・日記・記念日で共通）
+    const CAL_MIN_YEAR = 2000;
+    const CAL_MAX_YEAR = 2100;
+    const DATE_MIN = `${CAL_MIN_YEAR}-01-01`;
+    const DATE_MAX = `${CAL_MAX_YEAR}-12-31`;
+
+    function isDateInRange(dateStr) {
+      return typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateStr) && dateStr >= DATE_MIN && dateStr <= DATE_MAX;
+    }
+
+    // タグ絞り込みボタンの見た目
+    const CHIP_ON = 'tag-chip active shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold bg-roseAccent text-white transition';
+    const CHIP_OFF = 'tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition';
 
     // ---------- localStorage（使えない環境ではメモリで代用） ----------
     const memStore = {};
@@ -596,8 +671,8 @@
       const toast = document.getElementById('toastNotification');
       document.getElementById('toastMessage').textContent = msg;
       document.getElementById('toastIcon').className = isError
-        ? 'fa-solid fa-circle-exclamation text-amber-400'
-        : 'fa-solid fa-heart text-roseAccent';
+        ? 'fa-solid fa-circle-exclamation text-amber-400 shrink-0'
+        : 'fa-solid fa-heart text-roseAccent shrink-0';
       toast.classList.remove('opacity-0', 'pointer-events-none');
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 2800);
@@ -608,7 +683,51 @@
       const dot = document.getElementById('syncStatusDot');
       document.getElementById('syncStatusText').textContent = text;
       const colors = { online: 'bg-emerald-500', connecting: 'bg-amber-400', local: 'bg-amber-400', error: 'bg-red-500' };
-      dot.className = `w-2 h-2 rounded-full inline-block ${colors[status] || 'bg-amber-400'}`;
+      dot.className = `w-2 h-2 shrink-0 rounded-full inline-block ${colors[status] || 'bg-amber-400'}`;
+    }
+
+    // ---------- ファビコン（💕）：PNG版を作って設定（Safari・iPhoneホーム画面用） ----------
+    function makeEmojiPng(size, bg) {
+      const c = document.createElement('canvas');
+      c.width = size;
+      c.height = size;
+      const ctx = c.getContext('2d');
+      if (bg) {
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, size, size);
+      }
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `${Math.floor(size * 0.72)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+      ctx.fillText('💕', size / 2, size / 2 + size * 0.04);
+      return c.toDataURL('image/png');
+    }
+
+    function setupFavicon() {
+      try {
+        const add = (rel, href, sizes) => {
+          const link = document.createElement('link');
+          link.rel = rel;
+          if (rel === 'icon') link.type = 'image/png';
+          if (sizes) link.sizes = sizes;
+          link.href = href;
+          document.head.appendChild(link);
+        };
+        add('icon', makeEmojiPng(64, null), '64x64');
+        add('apple-touch-icon', makeEmojiPng(180, '#FAF8F5'), '180x180');
+      } catch (e) { /* アイコン作成に失敗しても動作に影響なし */ }
+    }
+
+    // ---------- モーダル表示中は背面のスクロールを止める ----------
+    function setupBodyScrollLock() {
+      const ids = ['pinLockOverlay', 'editorModal', 'settingsModal', 'syncModal', 'deleteConfirmModal'];
+      const update = () => {
+        const open = ids.some(id => !document.getElementById(id).classList.contains('hidden'));
+        document.body.style.overflow = open ? 'hidden' : '';
+      };
+      const obs = new MutationObserver(update);
+      ids.forEach(id => obs.observe(document.getElementById(id), { attributes: true, attributeFilter: ['class'] }));
+      update();
     }
 
     // ---------- データ層（クラウド / ローカル） ----------
@@ -887,9 +1006,46 @@
     }
 
     // ---------- カレンダー ----------
+    // 年・月のプルダウン（2000年〜2100年に固定）
+    function populateCalendarPickers() {
+      const ySel = document.getElementById('calYearSelect');
+      const mSel = document.getElementById('calMonthSelect');
+      // 範囲外の日付の日記があっても表示できるよう、その年も選択肢に含める
+      const minY = Math.min(CAL_MIN_YEAR, currentCalYear);
+      const maxY = Math.max(CAL_MAX_YEAR, currentCalYear);
+      const count = maxY - minY + 1;
+
+      if (ySel.options.length !== count || Number(ySel.options[0].value) !== minY) {
+        ySel.innerHTML = '';
+        for (let y = minY; y <= maxY; y++) {
+          const o = document.createElement('option');
+          o.value = String(y);
+          o.textContent = `${y}年`;
+          ySel.appendChild(o);
+        }
+      }
+      if (mSel.options.length !== 12) {
+        mSel.innerHTML = '';
+        for (let m = 0; m < 12; m++) {
+          const o = document.createElement('option');
+          o.value = String(m);
+          o.textContent = `${m + 1}月`;
+          mSel.appendChild(o);
+        }
+      }
+      ySel.value = String(currentCalYear);
+      mSel.value = String(currentCalMonth);
+    }
+
+    window.onCalendarPick = function () {
+      currentCalYear = Number(document.getElementById('calYearSelect').value);
+      currentCalMonth = Number(document.getElementById('calMonthSelect').value);
+      renderCalendar();
+    };
+
     function renderCalendar() {
       const grid = document.getElementById('calendarGrid');
-      document.getElementById('calendarMonthYear').textContent = `${currentCalYear}年 ${currentCalMonth + 1}月`;
+      populateCalendarPickers();
       grid.innerHTML = '';
 
       const firstDay = new Date(currentCalYear, currentCalMonth, 1).getDay();
@@ -929,10 +1085,18 @@
       }
     }
 
+    // 前後の月へ移動（2000年〜2100年の範囲外には出ない）
     window.changeMonth = function (delta) {
-      currentCalMonth += delta;
-      if (currentCalMonth > 11) { currentCalMonth = 0; currentCalYear++; }
-      else if (currentCalMonth < 0) { currentCalMonth = 11; currentCalYear--; }
+      let y = currentCalYear;
+      let m = currentCalMonth + delta;
+      if (m > 11) { m = 0; y++; }
+      else if (m < 0) { m = 11; y--; }
+      if (y < CAL_MIN_YEAR || y > CAL_MAX_YEAR) {
+        showToast(`${CAL_MIN_YEAR}年〜${CAL_MAX_YEAR}年の範囲で選べます`, true);
+        return;
+      }
+      currentCalYear = y;
+      currentCalMonth = m;
       renderCalendar();
     };
 
@@ -951,6 +1115,25 @@
       renderSelectedDateCard();
     };
 
+    // カレンダーを左右にスワイプして月を移動（スマホ）
+    function setupCalendarSwipe() {
+      const grid = document.getElementById('calendarGrid');
+      let sx = 0, sy = 0;
+      grid.addEventListener('touchstart', (e) => {
+        const t = e.changedTouches[0];
+        sx = t.clientX;
+        sy = t.clientY;
+      }, { passive: true });
+      grid.addEventListener('touchend', (e) => {
+        const t = e.changedTouches[0];
+        const dx = t.clientX - sx;
+        const dy = t.clientY - sy;
+        if (Math.abs(dx) > 60 && Math.abs(dy) < 40) {
+          window.changeMonth(dx < 0 ? 1 : -1);
+        }
+      }, { passive: true });
+    }
+
     // ---------- 選択日の日記 ----------
     function renderSelectedDateCard() {
       const container = document.getElementById('selectedDateCard');
@@ -961,11 +1144,11 @@
 
       if (dayEntries.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-6">
+          <div class="text-center py-5 sm:py-6">
             <p class="text-xs font-bold text-roseAccent mb-1">${formattedDate}</p>
             <p class="font-journal text-base font-bold text-cocoa mb-2">この日の日記はまだありません</p>
             <p class="text-xs text-taupe mb-5">ふたりの出来事や気持ちを記録して残しませんか？</p>
-            <button type="button" data-action="write" data-date="${escapeHtml(selectedDateStr)}" class="px-5 py-2.5 rounded-xl bg-roseLight hover:bg-roseAccent text-roseDark hover:text-white text-xs font-bold transition inline-flex items-center gap-1.5">
+            <button type="button" data-action="write" data-date="${escapeHtml(selectedDateStr)}" class="px-5 py-3 sm:py-2.5 rounded-xl bg-roseLight hover:bg-roseAccent text-roseDark hover:text-white text-xs font-bold transition inline-flex items-center gap-1.5">
               <i class="fa-solid fa-pen"></i>
               <span>この日の日記を書く</span>
             </button>
@@ -980,7 +1163,7 @@
             <span class="text-xs font-bold text-roseAccent block">${formattedDate}</span>
             <span class="text-[11px] text-taupe">${dayEntries.length}件の思い出</span>
           </div>
-          <button type="button" data-action="write" data-date="${escapeHtml(selectedDateStr)}" class="px-3 py-1.5 rounded-xl bg-cream hover:bg-roseLight text-cocoa text-xs font-bold transition">
+          <button type="button" data-action="write" data-date="${escapeHtml(selectedDateStr)}" class="px-3 py-2 sm:py-1.5 rounded-xl bg-cream hover:bg-roseLight text-cocoa text-xs font-bold transition whitespace-nowrap">
             <i class="fa-solid fa-plus mr-1 text-roseAccent"></i>追記する
           </button>
         </div>
@@ -992,18 +1175,18 @@
                   <span class="inline-block px-2.5 py-0.5 rounded-full bg-roseLight text-roseDark text-[11px] font-bold mb-1.5">
                     ${getTagEmoji(entry.tag)} ${escapeHtml(entry.tag || '日常')}
                   </span>
-                  <h3 class="font-journal text-lg font-bold text-cocoa leading-snug break-words">${escapeHtml(entry.title)}</h3>
+                  <h3 class="font-journal text-base sm:text-lg font-bold text-cocoa leading-snug break-words">${escapeHtml(entry.title)}</h3>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
-                  <button type="button" data-action="edit" data-id="${escapeHtml(entry.id)}" class="w-8 h-8 rounded-xl bg-cream hover:bg-ivory text-taupe hover:text-cocoa flex items-center justify-center text-xs transition" title="編集">
+                  <button type="button" data-action="edit" data-id="${escapeHtml(entry.id)}" class="w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-cream hover:bg-ivory text-taupe hover:text-cocoa flex items-center justify-center text-xs transition" title="編集" aria-label="編集">
                     <i class="fa-solid fa-pen"></i>
                   </button>
-                  <button type="button" data-action="delete" data-id="${escapeHtml(entry.id)}" class="w-8 h-8 rounded-xl bg-cream hover:bg-red-50 text-taupe hover:text-red-500 flex items-center justify-center text-xs transition" title="削除">
+                  <button type="button" data-action="delete" data-id="${escapeHtml(entry.id)}" class="w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-cream hover:bg-red-50 text-taupe hover:text-red-500 flex items-center justify-center text-xs transition" title="削除" aria-label="削除">
                     <i class="fa-regular fa-trash-can"></i>
                   </button>
                 </div>
               </div>
-              <p class="text-sm text-cocoa/90 whitespace-pre-wrap break-words leading-relaxed bg-cream/60 p-4 rounded-2xl">${escapeHtml(entry.content)}</p>
+              <p class="text-sm text-cocoa/90 whitespace-pre-wrap break-words leading-relaxed bg-cream/60 p-3.5 sm:p-4 rounded-2xl">${escapeHtml(entry.content)}</p>
             </article>
           `).join('<hr class="border-ivory my-4">')}
         </div>
@@ -1014,9 +1197,7 @@
     window.setTagFilter = function (tag) {
       currentTagFilter = tag;
       document.querySelectorAll('.tag-chip').forEach(btn => {
-        btn.className = btn.dataset.tag === tag
-          ? 'tag-chip active px-3 py-1.5 rounded-full text-xs font-bold bg-roseAccent text-white transition'
-          : 'tag-chip px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition';
+        btn.className = btn.dataset.tag === tag ? CHIP_ON : CHIP_OFF;
       });
       renderTimeline();
     };
@@ -1051,7 +1232,7 @@
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-12 px-4 bg-cream/50 rounded-2xl border border-dashed border-ivory">
+          <div class="text-center py-10 sm:py-12 px-4 bg-cream/50 rounded-2xl border border-dashed border-ivory">
             <i class="fa-regular fa-face-smile text-3xl text-taupe/60 mb-2"></i>
             <p class="text-sm font-bold text-cocoa mb-1">該当する思い出が見つかりませんでした</p>
             <p class="text-xs text-taupe">別のキーワードで検索するか、「日記を書く」から新しい思い出を追加しましょう。</p>
@@ -1061,17 +1242,17 @@
       }
 
       container.innerHTML = filtered.map(entry => `
-        <div data-action="jump" data-date="${escapeHtml(entry.date)}" class="cursor-pointer group bg-cream/60 hover:bg-roseLight/30 border border-ivory hover:border-roseAccent/40 rounded-2xl p-4 transition flex gap-3.5 items-start">
-          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white border border-ivory flex items-center justify-center shrink-0 text-roseAccent">
-            <span class="text-xl">${getTagEmoji(entry.tag)}</span>
+        <div data-action="jump" data-date="${escapeHtml(entry.date)}" class="cursor-pointer group bg-cream/60 hover:bg-roseLight/30 border border-ivory hover:border-roseAccent/40 rounded-2xl p-3.5 sm:p-4 transition flex gap-3 sm:gap-3.5 items-start">
+          <div class="w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-white border border-ivory flex items-center justify-center shrink-0 text-roseAccent">
+            <span class="text-lg sm:text-xl">${getTagEmoji(entry.tag)}</span>
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-2 mb-1">
-              <span class="text-[11px] font-bold text-roseDark">${formatDateJapanese(entry.date)}</span>
+              <span class="text-[11px] font-bold text-roseDark truncate">${formatDateJapanese(entry.date)}</span>
               <span class="text-[10px] px-2 py-0.5 rounded-full bg-white text-taupe border border-ivory shrink-0">${escapeHtml(entry.tag || '日常')}</span>
             </div>
             <h4 class="font-journal font-bold text-sm sm:text-base text-cocoa truncate group-hover:text-roseDark transition">${escapeHtml(entry.title)}</h4>
-            <p class="text-xs text-taupe line-clamp-2 mt-1 leading-relaxed">${escapeHtml(entry.content)}</p>
+            <p class="text-xs text-taupe line-clamp-2 mt-1 leading-relaxed break-words">${escapeHtml(entry.content)}</p>
           </div>
         </div>
       `).join('');
@@ -1096,8 +1277,8 @@
       const searchCol = document.getElementById('searchColumn');
       const btnCal = document.getElementById('tabBtnCalendar');
       const btnSearch = document.getElementById('tabBtnSearch');
-      const on = 'flex-1 py-2 rounded-xl text-xs font-bold bg-white text-roseDark shadow-sm transition';
-      const off = 'flex-1 py-2 rounded-xl text-xs font-bold text-taupe transition';
+      const on = 'flex-1 py-2.5 rounded-xl text-xs font-bold bg-white text-roseDark shadow-sm transition';
+      const off = 'flex-1 py-2.5 rounded-xl text-xs font-bold text-taupe transition';
 
       if (tab === 'calendar') {
         calCol.classList.remove('hidden');
@@ -1121,11 +1302,12 @@
         saving: ['保存中...', 'text-taupe'],
         saved: ['自動保存しました ✓', 'text-emerald-600'],
         waiting: ['接続を待っています...', 'text-amber-600'],
+        range: [`日付は${CAL_MIN_YEAR}年〜${CAL_MAX_YEAR}年の範囲で入力してください`, 'text-red-500'],
         error: ['保存できませんでした。もう一度お試しください', 'text-red-500']
       };
       const [text, color] = map[state] || map.idle;
       el.textContent = text;
-      el.className = `text-[11px] ${color}`;
+      el.className = `text-[11px] truncate ${color}`;
     }
 
     function resetEditorForm(dateStr) {
@@ -1144,7 +1326,8 @@
         openSyncModal(true);
         return;
       }
-      const date = (typeof dateStr === 'string' && dateStr) ? dateStr : (selectedDateStr || formatDateISO(new Date()));
+      let date = (typeof dateStr === 'string' && dateStr) ? dateStr : (selectedDateStr || formatDateISO(new Date()));
+      if (!isDateInRange(date)) date = formatDateISO(new Date());
       resetEditorForm(date);
       document.getElementById('editorModalTitle').textContent = '新しい思い出を記録する';
       document.getElementById('editorModal').classList.remove('hidden');
@@ -1172,7 +1355,7 @@
       autosaveTimer = setTimeout(() => { persistEditor(); }, 1200);
     };
 
-    // 戻り値: 'saved' | 'clean' | 'empty' | 'error'
+    // 戻り値: 'saved' | 'clean' | 'empty' | 'range' | 'error'
     async function persistEditor() {
       clearTimeout(autosaveTimer);
       if (!editorDirty) return 'clean';
@@ -1181,6 +1364,11 @@
       const title = document.getElementById('entryTitleInput').value.trim();
       const content = document.getElementById('entryContentInput').value.trim();
       if (!date || (!title && !content)) { setSaveIndicator('idle'); return 'empty'; }
+
+      if (!isDateInRange(date)) {
+        setSaveIndicator('range');
+        return 'range';
+      }
 
       if (!canSave()) {
         if (mode === 'connecting') {
@@ -1228,6 +1416,10 @@
 
     window.closeEditorModal = async function () {
       const result = await persistEditor();
+      if (result === 'range') {
+        showToast(`日付は${CAL_MIN_YEAR}年〜${CAL_MAX_YEAR}年の範囲で入力してください`, true);
+        return;
+      }
       if (result === 'error') {
         showToast('まだ保存できていません。通信を確認してください', true);
         return;
@@ -1236,7 +1428,7 @@
       document.getElementById('editorModal').classList.add('hidden');
       clearTimeout(autosaveTimer);
 
-      if (result === 'saved' && date) {
+      if (result === 'saved' && isDateInRange(date)) {
         const [y, m] = date.split('-').map(Number);
         currentCalYear = y;
         currentCalMonth = m - 1;
@@ -1271,6 +1463,72 @@
       }
     };
 
+    // ---------- バックアップ（テキスト書き出し） ----------
+    function updateUsageText() {
+      const el = document.getElementById('storageUsageText');
+      if (!entriesLoaded) {
+        el.textContent = '読み込み中...';
+        return;
+      }
+      const bytes = new Blob([JSON.stringify(diaryEntries)]).size;
+      const kb = bytes / 1024;
+      const sizeText = kb < 1024 ? `${kb.toFixed(1)} KB` : `${(kb / 1024).toFixed(2)} MB`;
+      el.textContent = `いまの日記：${diaryEntries.length.toLocaleString()}件 / 約${sizeText}（無料枠の目安は約1GB）`;
+    }
+
+    window.exportBackup = function () {
+      if (!entriesLoaded || diaryEntries.length === 0) {
+        showToast('書き出せる日記がまだありません', true);
+        return;
+      }
+
+      const list = [...diaryEntries].sort((a, b) =>
+        (a.date || '').localeCompare(b.date || '') || (a.createdAt || '').localeCompare(b.createdAt || '')
+      );
+
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const stamp = `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      const line = '='.repeat(40);
+      const thin = '-'.repeat(40);
+
+      const head = [
+        'ふたりの思い出日記 バックアップ',
+        `書き出し日時: ${stamp}`,
+        `日記の数: ${list.length}件`
+      ];
+      if (userSettings.anniversaryDate) head.push(`記念日: ${userSettings.anniversaryDate}`);
+
+      const blocks = list.map(e => [
+        line,
+        `日付: ${formatDateJapanese(e.date)}`,
+        `項目: ${e.tag || '日常'}`,
+        `タイトル: ${e.title || ''}`,
+        thin,
+        e.content || '',
+        ''
+      ].join('\n'));
+
+      const text = head.join('\n') + '\n\n' + blocks.join('\n') + '\n' + line + '\n';
+      const fileName = `memory-diary-backup-${formatDateISO(now).replace(/-/g, '')}.txt`;
+
+      try {
+        const blob = new Blob(['\uFEFF' + text], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+        showToast(`${list.length}件の日記を書き出しました`);
+      } catch (err) {
+        console.error('Export error:', err);
+        showToast('書き出しに失敗しました', true);
+      }
+    };
+
     // ---------- 設定モーダル ----------
     window.openSettingsModal = function () {
       document.getElementById('settingAnniversaryInput').value = userSettings.anniversaryDate || '';
@@ -1278,6 +1536,7 @@
       document.getElementById('displaySyncCode').textContent = syncCode || '未設定';
       document.getElementById('syncSection').classList.toggle('hidden', mode === 'local');
       refreshPinStatus();
+      updateUsageText();
       document.getElementById('settingsModal').classList.remove('hidden');
     };
 
@@ -1287,6 +1546,10 @@
 
     window.saveAnniversary = async function () {
       const val = document.getElementById('settingAnniversaryInput').value;
+      if (val && !isDateInRange(val)) {
+        showToast(`記念日は${CAL_MIN_YEAR}年〜${CAL_MAX_YEAR}年の範囲で入力してください`, true);
+        return;
+      }
       try {
         await savePrefs({ anniversaryDate: val });
         showToast('記念日を保存しました');
@@ -1367,6 +1630,9 @@
       pinHash = lsGet(LS.pin) || '';
       if (pinHash) showLock();
 
+      setupFavicon();
+      setupBodyScrollLock();
+      setupCalendarSwipe();
       renderAll();
       initFirebase();
     })();
