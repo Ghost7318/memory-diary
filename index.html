@@ -9,6 +9,19 @@
   <!-- ファビコン（📓）：SVG版。PNG版（Safari・iPhoneホーム画面用）はJSで追加します -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%93%3C/text%3E%3C/svg%3E">
 
+  <!-- 表示設定（ダークモード・文字サイズ）を描画前に反映 -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('memoryDiary.theme') || 'auto';
+        var dark = t === 'dark' || (t === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+        var f = localStorage.getItem('memoryDiary.fontSize');
+        if (f) document.documentElement.setAttribute('data-fs', f);
+      } catch (e) { /* noop */ }
+    })();
+  </script>
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
@@ -27,31 +40,54 @@
             serif: ['"Shippori Mincho"', 'serif'],
           },
           colors: {
-            cream: '#FAF8F5',
-            ivory: '#F3EFEA',
-            roseAccent: '#D9777F',
-            roseDark: '#B85A62',
-            roseLight: '#FCECEE',
-            cocoa: '#4A3F3B',
-            taupe: '#8C7E78',
+            cream: 'rgb(var(--c-cream) / <alpha-value>)',
+            ivory: 'rgb(var(--c-ivory) / <alpha-value>)',
+            roseAccent: 'rgb(var(--c-rose) / <alpha-value>)',
+            roseDark: 'rgb(var(--c-roseDark) / <alpha-value>)',
+            roseLight: 'rgb(var(--c-roseLight) / <alpha-value>)',
+            cocoa: 'rgb(var(--c-cocoa) / <alpha-value>)',
+            taupe: 'rgb(var(--c-taupe) / <alpha-value>)',
           }
         }
       }
     }
   </script>
   <style>
+    :root {
+      --c-cream: 250 248 245;
+      --c-ivory: 243 239 234;
+      --c-rose: 217 119 127;
+      --c-roseDark: 184 90 98;
+      --c-roseLight: 252 236 238;
+      --c-cocoa: 74 63 59;
+      --c-taupe: 140 126 120;
+      --c-card: 255 255 255;
+    }
+    html.dark {
+      --c-cream: 30 26 24;
+      --c-ivory: 62 54 50;
+      --c-rose: 226 130 138;
+      --c-roseDark: 214 112 121;
+      --c-roseLight: 74 46 50;
+      --c-cocoa: 240 233 228;
+      --c-taupe: 176 164 157;
+      --c-card: 43 37 34;
+      color-scheme: dark;
+    }
+    html[data-fs="s"] { font-size: 14px; }
+    html[data-fs="l"] { font-size: 18px; }
     html { -webkit-text-size-adjust: 100%; }
     body {
-      background-color: #FAF8F5;
-      color: #4A3F3B;
+      background-color: rgb(var(--c-cream));
+      color: rgb(var(--c-cocoa));
       font-family: 'Noto Sans JP', sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
     .font-journal { font-family: 'Shippori Mincho', serif; }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #FAF8F5; }
-    ::-webkit-scrollbar-thumb { background: #E2D8D3; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #D9777F; }
+    ::-webkit-scrollbar-track { background: rgb(var(--c-cream)); }
+    ::-webkit-scrollbar-thumb { background: rgb(var(--c-ivory)); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgb(var(--c-rose)); }
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       25% { transform: translateX(-8px); }
@@ -64,6 +100,7 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    mark { background: rgba(250, 204, 21, .4); color: inherit; border-radius: 3px; padding: 0 1px; }
     .cal-select {
       appearance: none;
       -webkit-appearance: none;
@@ -71,6 +108,21 @@
       background-repeat: no-repeat;
       background-position: right 8px center;
     }
+    .fav-on { display: none; }
+    .fav-toggle input:checked + .fav-box .fav-on { display: inline; }
+    .fav-toggle input:checked + .fav-box .fav-off { display: none; }
+    .fav-toggle input:checked + .fav-box { border-color: #fbbf24; }
+
+    /* ---- ダークモード：Tailwind標準色の置き換え ---- */
+    .dark .bg-white { background-color: rgb(var(--c-card)); }
+    .dark .bg-white\/90 { background-color: rgb(var(--c-card) / .9); }
+    .dark .focus\:bg-white:focus { background-color: rgb(var(--c-card)); }
+    .dark .bg-cocoa\/40 { background-color: rgb(0 0 0 / .6); }
+    .dark .bg-red-50 { background-color: rgb(80 35 35); }
+    .dark .bg-amber-50 { background-color: rgb(70 52 20); }
+    .dark .border-amber-100 { border-color: rgb(110 82 30); }
+    .dark .text-amber-700 { color: #f5c26b; }
+    .dark #toastNotification { background-color: rgb(16 13 12); color: #fff; }
 
     /* ---- スマホ向けの調整 ---- */
     .modal-panel { max-height: 92vh; max-height: 92dvh; }
@@ -81,7 +133,6 @@
     .no-scrollbar { scrollbar-width: none; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     @media (max-width: 639px) {
-      /* iPhoneで入力欄を押したときに画面が拡大されるのを防ぐ */
       input, select, textarea { font-size: 16px !important; }
       input[type="date"] {
         -webkit-appearance: none;
@@ -110,22 +161,7 @@
         <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-roseAccent transition-all"></span>
       </div>
 
-      <div class="grid grid-cols-3 gap-3 max-w-[240px] mx-auto">
-        <button type="button" onclick="handlePinKey('1')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">1</button>
-        <button type="button" onclick="handlePinKey('2')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">2</button>
-        <button type="button" onclick="handlePinKey('3')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">3</button>
-        <button type="button" onclick="handlePinKey('4')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">4</button>
-        <button type="button" onclick="handlePinKey('5')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">5</button>
-        <button type="button" onclick="handlePinKey('6')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">6</button>
-        <button type="button" onclick="handlePinKey('7')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">7</button>
-        <button type="button" onclick="handlePinKey('8')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">8</button>
-        <button type="button" onclick="handlePinKey('9')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">9</button>
-        <div class="h-14"></div>
-        <button type="button" onclick="handlePinKey('0')" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">0</button>
-        <button type="button" onclick="handlePinDelete()" class="h-14 rounded-2xl bg-ivory/70 hover:bg-ivory active:scale-95 text-base text-taupe transition flex items-center justify-center" aria-label="削除">
-          <i class="fa-solid fa-delete-left"></i>
-        </button>
-      </div>
+      <div id="pinPad" class="grid grid-cols-3 gap-3 max-w-[240px] mx-auto"></div>
       <p class="text-[10px] text-taupe/80 mt-6 leading-relaxed">忘れた場合は、ブラウザのサイトデータを削除するとロックが外れます（日記はクラウドに残ります）。</p>
     </div>
   </div>
@@ -161,6 +197,9 @@
 
   <!-- ==================== 3. メインコンテンツ ==================== -->
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-4 sm:pt-6 page-bottom space-y-4 sm:space-y-6">
+
+    <!-- 書き忘れのお知らせ -->
+    <div id="reminderBanner" class="hidden"></div>
 
     <!-- 統計カード -->
     <section class="grid grid-cols-3 gap-2 sm:gap-5">
@@ -211,6 +250,15 @@
       </div>
     </section>
 
+    <!-- 節目・連続記録 -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-5">
+      <div id="milestoneCard" class="bg-white rounded-2xl p-4 sm:p-5 border border-ivory shadow-sm"></div>
+      <div id="streakCard" class="bg-white rounded-2xl p-4 sm:p-5 border border-ivory shadow-sm"></div>
+    </section>
+
+    <!-- 去年の今日 -->
+    <section id="onThisDayCard" class="hidden bg-white rounded-2xl p-4 sm:p-5 border border-ivory shadow-sm"></section>
+
     <!-- モバイル用タブ -->
     <div class="flex lg:hidden bg-ivory p-1 rounded-2xl">
       <button type="button" id="tabBtnCalendar" onclick="switchMobileTab('calendar')" class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-white text-roseDark shadow-sm transition">
@@ -257,11 +305,14 @@
           <div class="mt-3 sm:mt-4 pt-3 border-t border-ivory flex items-center justify-between gap-2 text-[11px] text-taupe">
             <span class="flex items-center gap-1.5 min-w-0">
               <i class="fa-solid fa-heart text-roseAccent shrink-0"></i>
-              <span class="truncate">日記がある日<span class="sm:hidden"> ・ スワイプで月移動</span></span>
+              <span class="truncate">日記がある日（多いほど濃い）<span class="sm:hidden"> ・ スワイプで月移動</span></span>
             </span>
             <button type="button" onclick="jumpToToday()" class="sm:hidden shrink-0 px-3 py-1.5 rounded-xl bg-roseLight/70 hover:bg-roseLight text-roseDark text-xs font-bold transition whitespace-nowrap">今日へ</button>
             <span class="hidden sm:inline text-right">タップで閲覧・記入 ／ スワイプで月移動</span>
           </div>
+
+          <!-- この月の気分 -->
+          <div id="moodSummary" class="mt-3 pt-3 border-t border-ivory"></div>
         </div>
 
         <div id="selectedDateCard" class="bg-white rounded-3xl p-4 sm:p-6 border border-ivory shadow-sm transition"></div>
@@ -284,7 +335,7 @@
               type="text"
               id="searchInput"
               oninput="handleSearchFilter()"
-              placeholder="キーワードで検索"
+              placeholder="キーワードで検索（スペースで複数）"
               class="w-full pl-10 pr-10 py-3 rounded-2xl bg-cream border border-ivory focus:border-roseAccent focus:bg-white focus:outline-none text-sm text-cocoa placeholder-taupe/70 transition"
             >
             <button type="button" id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-ivory text-taupe hover:text-cocoa flex items-center justify-center text-xs" aria-label="検索をクリア">
@@ -292,13 +343,41 @@
             </button>
           </div>
 
-          <div id="filterTagsContainer" class="flex gap-1.5 mb-4 sm:mb-5 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1 sm:flex-wrap sm:overflow-visible">
-            <button type="button" onclick="setTagFilter('すべて')" data-tag="すべて" class="tag-chip active shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold bg-roseAccent text-white transition">すべて</button>
-            <button type="button" onclick="setTagFilter('デート')" data-tag="デート" class="tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">💕 デート</button>
-            <button type="button" onclick="setTagFilter('記念日')" data-tag="記念日" class="tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">🎂 記念日</button>
-            <button type="button" onclick="setTagFilter('旅行')" data-tag="旅行" class="tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">✈️ 旅行</button>
-            <button type="button" onclick="setTagFilter('幸せ')" data-tag="幸せ" class="tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">🥰 幸せ</button>
-            <button type="button" onclick="setTagFilter('日常')" data-tag="日常" class="tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">☕ 日常</button>
+          <div id="filterTagsContainer" class="flex gap-1.5 mb-3 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1 sm:flex-wrap sm:overflow-visible"></div>
+
+          <!-- 絞り込み・並び替え -->
+          <div class="mb-4">
+            <button type="button" onclick="toggleAdvanced()" class="px-3 py-2 rounded-xl bg-cream hover:bg-roseLight border border-ivory text-cocoa text-xs font-bold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-sliders text-roseAccent"></i>
+              <span>期間・並び順・書いた人</span>
+              <span id="advBadge" class="hidden px-1.5 py-0.5 rounded-full bg-roseAccent text-white text-[10px] leading-none"></span>
+            </button>
+            <div id="advPanel" class="hidden mt-2 rounded-2xl bg-cream/70 border border-ivory p-3.5 space-y-3">
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] font-bold text-taupe mb-1">この日から</label>
+                  <input type="date" id="filterFrom" min="2000-01-01" max="2100-12-31" onchange="applyAdvanced()" class="w-full px-3 py-2 rounded-xl bg-white border border-ivory focus:border-roseAccent focus:outline-none text-sm text-cocoa">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-taupe mb-1">この日まで</label>
+                  <input type="date" id="filterTo" min="2000-01-01" max="2100-12-31" onchange="applyAdvanced()" class="w-full px-3 py-2 rounded-xl bg-white border border-ivory focus:border-roseAccent focus:outline-none text-sm text-cocoa">
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] font-bold text-taupe mb-1">並び順</label>
+                  <select id="filterSort" onchange="applyAdvanced()" class="w-full px-3 py-2 rounded-xl bg-white border border-ivory focus:border-roseAccent focus:outline-none text-sm text-cocoa">
+                    <option value="desc">新しい順</option>
+                    <option value="asc">古い順</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-taupe mb-1">書いた人</label>
+                  <select id="filterAuthor" onchange="applyAdvanced()" class="w-full px-3 py-2 rounded-xl bg-white border border-ivory focus:border-roseAccent focus:outline-none text-sm text-cocoa"></select>
+                </div>
+              </div>
+              <button type="button" onclick="resetAdvanced()" class="text-[11px] text-roseDark hover:underline">条件をリセット</button>
+            </div>
           </div>
 
           <div id="entriesTimeline" class="space-y-3 lg:max-h-[600px] lg:overflow-y-auto lg:pr-1"></div>
@@ -332,30 +411,19 @@
           <input type="date" id="entryDateInput" required min="2000-01-01" max="2100-12-31" class="w-full px-4 py-2.5 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:bg-white focus:outline-none text-sm text-cocoa font-medium">
         </div>
 
+        <div id="authorField" class="hidden">
+          <label class="block text-xs font-bold text-taupe mb-1.5">書いた人</label>
+          <div id="authorOptions" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
         <div>
           <label class="block text-xs font-bold text-taupe mb-1.5">タグ・カテゴリ</label>
-          <div class="grid grid-cols-5 gap-1.5">
-            <label class="cursor-pointer">
-              <input type="radio" name="entryTag" value="デート" class="peer sr-only" checked>
-              <div class="text-center py-2 px-1 rounded-xl bg-cream border border-ivory peer-checked:bg-roseLight peer-checked:border-roseAccent peer-checked:text-roseDark text-xs font-medium transition">💕<br>デート</div>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="entryTag" value="記念日" class="peer sr-only">
-              <div class="text-center py-2 px-1 rounded-xl bg-cream border border-ivory peer-checked:bg-roseLight peer-checked:border-roseAccent peer-checked:text-roseDark text-xs font-medium transition">🎂<br>記念日</div>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="entryTag" value="旅行" class="peer sr-only">
-              <div class="text-center py-2 px-1 rounded-xl bg-cream border border-ivory peer-checked:bg-roseLight peer-checked:border-roseAccent peer-checked:text-roseDark text-xs font-medium transition">✈️<br>旅行</div>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="entryTag" value="幸せ" class="peer sr-only">
-              <div class="text-center py-2 px-1 rounded-xl bg-cream border border-ivory peer-checked:bg-roseLight peer-checked:border-roseAccent peer-checked:text-roseDark text-xs font-medium transition">🥰<br>幸せ</div>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="entryTag" value="日常" class="peer sr-only">
-              <div class="text-center py-2 px-1 rounded-xl bg-cream border border-ivory peer-checked:bg-roseLight peer-checked:border-roseAccent peer-checked:text-roseDark text-xs font-medium transition">☕<br>日常</div>
-            </label>
-          </div>
+          <div id="editorTagGrid" class="grid grid-cols-5 gap-1.5"></div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-taupe mb-1.5">今日の気分</label>
+          <div id="editorMoodGrid" class="flex flex-wrap gap-1.5"></div>
         </div>
 
         <div>
@@ -364,8 +432,21 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-taupe mb-1.5">思い出メモ</label>
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <label class="block text-xs font-bold text-taupe">思い出メモ</label>
+            <select id="templateSelect" onchange="applyTemplate(this)" aria-label="テンプレートを選ぶ" class="text-xs px-2.5 py-1.5 rounded-lg bg-cream border border-ivory text-taupe focus:outline-none cursor-pointer"></select>
+          </div>
           <textarea id="entryContentInput" rows="6" maxlength="5000" placeholder="今日あった嬉しいことや、ふたりの会話、感想などを自由に書いて残しましょう..." class="w-full px-4 py-3 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:bg-white focus:outline-none text-sm text-cocoa leading-relaxed resize-none"></textarea>
+        </div>
+
+        <div>
+          <label class="fav-toggle cursor-pointer select-none inline-block">
+            <input type="checkbox" id="entryFavInput" class="sr-only">
+            <span class="fav-box inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-cream border border-ivory text-sm font-medium transition">
+              <span class="fav-off text-taupe">☆ お気に入りにする</span>
+              <span class="fav-on text-amber-500 font-bold">★ お気に入り</span>
+            </span>
+          </label>
         </div>
 
         <div class="pt-1">
@@ -384,7 +465,7 @@
       <div class="px-5 sm:px-6 py-3.5 sm:py-4 bg-cream border-b border-ivory flex items-center justify-between">
         <h3 class="font-journal text-base sm:text-lg font-bold text-cocoa flex items-center gap-2 min-w-0">
           <i class="fa-solid fa-sliders text-roseAccent"></i>
-          <span class="truncate">記念日・共有・ロック設定</span>
+          <span class="truncate">設定</span>
         </h3>
         <button type="button" onclick="closeSettingsModal()" class="w-9 h-9 shrink-0 rounded-full hover:bg-ivory text-taupe flex items-center justify-center transition" aria-label="閉じる">
           <i class="fa-solid fa-xmark"></i>
@@ -392,11 +473,17 @@
       </div>
 
       <div class="p-5 sm:p-6 safe-bottom sm:pb-6 space-y-5 overflow-y-auto overscroll-contain">
-        <!-- 閲覧専用サイトへのリンク -->
-        <a href="viewer.html" class="flex items-center justify-between gap-2 px-4 py-3 rounded-xl bg-cream hover:bg-roseLight border border-ivory text-cocoa text-sm font-bold transition">
-          <span class="flex items-center gap-2"><i class="fa-solid fa-book-open text-roseAccent"></i>閲覧専用サイトを開く</span>
-          <i class="fa-solid fa-arrow-up-right-from-square text-taupe text-xs"></i>
-        </a>
+
+        <!-- 表示 -->
+        <div>
+          <label class="block text-xs font-bold text-cocoa mb-2">
+            <i class="fa-solid fa-circle-half-stroke text-roseAccent mr-1"></i>表示（この端末のみ）
+          </label>
+          <p class="text-[11px] text-taupe mb-1.5">テーマ</p>
+          <div id="themeBtns" class="flex gap-1.5 mb-3"></div>
+          <p class="text-[11px] text-taupe mb-1.5">文字サイズ</p>
+          <div id="fontBtns" class="flex gap-1.5"></div>
+        </div>
 
         <hr class="border-ivory">
 
@@ -405,8 +492,26 @@
           <label class="block text-xs font-bold text-cocoa mb-1">
             <i class="fa-solid fa-heart text-roseAccent mr-1"></i>付き合った記念日
           </label>
-          <p class="text-[11px] text-taupe mb-2">設定すると「一緒になって〇〇日目」が自動計算されます（変更は自動で保存されます）。</p>
+          <p class="text-[11px] text-taupe mb-2">設定すると「一緒になって〇〇日目」と、100日ごと・周年のお知らせが出ます（変更は自動で保存されます）。</p>
           <input type="date" id="settingAnniversaryInput" min="2000-01-01" max="2100-12-31" onchange="saveAnniversary()" class="w-full px-4 py-2.5 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:outline-none text-sm text-cocoa">
+        </div>
+
+        <hr class="border-ivory">
+
+        <!-- 名前 -->
+        <div>
+          <label class="block text-xs font-bold text-cocoa mb-1">
+            <i class="fa-solid fa-user-group text-roseAccent mr-1"></i>ふたりの名前（書いた人の表示用）
+          </label>
+          <p class="text-[11px] text-taupe mb-2 leading-relaxed">入力して別の場所をタップすると保存され、2台で共有されます。名前を入れると、日記に「書いた人」が付けられます。</p>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="settingNameA" maxlength="12" placeholder="ひとりめ（例：はな）" onchange="saveNames()" class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:outline-none text-sm text-cocoa">
+            <input type="text" id="settingNameB" maxlength="12" placeholder="ふたりめ（例：たろう）" onchange="saveNames()" class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-ivory focus:border-roseAccent focus:outline-none text-sm text-cocoa">
+          </div>
+          <div id="meField" class="hidden mt-3">
+            <p class="text-[11px] text-taupe mb-1.5">この端末で書くのは（この端末のみ）</p>
+            <div id="meOptions" class="flex gap-1.5"></div>
+          </div>
         </div>
 
         <hr class="border-ivory">
@@ -434,7 +539,7 @@
             <i class="fa-solid fa-download text-roseAccent mr-1"></i>バックアップ（書き出し・読み込み）
           </label>
           <p class="text-[11px] text-taupe mb-2 leading-relaxed">
-            日付・項目・タイトル・本文を、日付の古い順にまとめたテキストファイル（.txt）として保存します。万が一に備えて、ときどき保存しておくと安心です。
+            日付・項目・書いた人・気分・お気に入り・タイトル・本文を、日付の古い順にテキストファイル（.txt）として保存します。書き出したファイルは、閲覧用ページ（viewer.html）でオフラインでも読めます。
           </p>
           <p id="storageUsageText" class="text-[11px] text-taupe bg-cream border border-ivory rounded-lg px-3 py-2 mb-2">読み込み中...</p>
           <button type="button" onclick="exportBackup()" class="w-full py-3 rounded-xl bg-roseLight hover:bg-roseAccent text-roseDark hover:text-white text-sm font-bold transition flex items-center justify-center gap-2">
@@ -442,7 +547,6 @@
             <span>日記をテキストファイルに書き出す</span>
           </button>
 
-          <!-- 読み込み -->
           <div class="mt-3 pt-3 border-t border-ivory">
             <p class="text-[11px] text-taupe mb-2 leading-relaxed">
               このアプリで書き出したテキストファイルから、日記を取り込めます。すでにある日記と同じ内容は、重複して取り込みません。
@@ -542,7 +646,7 @@
   <script type="module">
     // ---------- 設定 ----------
     // ※ appId・合言葉から作る保存先(spaceId)・コレクション名は、変更すると今の日記が見えなくなります。
-    const FAVICON_EMOJI = '📓'; // ファビコンの絵文字（ここを変えるとタブのアイコンが変わります）
+    const FAVICON_EMOJI = '📓';
     const firebaseConfigText = (typeof __firebase_config !== 'undefined')
       ? __firebase_config
       : (window.__firebase_config || '');
@@ -551,11 +655,23 @@
       code: 'memoryDiary.syncCode',
       pin: 'memoryDiary.pinHash',
       entries: 'memoryDiary.local.entries',
-      prefs: 'memoryDiary.local.prefs'
+      prefs: 'memoryDiary.local.prefs',
+      me: 'memoryDiary.me',
+      theme: 'memoryDiary.theme',
+      fontSize: 'memoryDiary.fontSize',
+      reminder: 'memoryDiary.reminderDismissed'
     };
     const TAGS = ['デート', '記念日', '旅行', '幸せ', '日常'];
+    const TAG_EMOJI = { 'デート': '💕', '記念日': '🎂', '旅行': '✈️', '幸せ': '🥰', '日常': '☕' };
+    const MOODS = [['😊', 'たのしい'], ['😆', '大笑い'], ['🥰', 'しあわせ'], ['😌', 'おだやか'], ['😢', 'かなしい'], ['😠', 'イライラ'], ['😴', 'つかれた']];
+    const TEMPLATES = [
+      { label: '今日のできごと', text: '【今日のできごと】\n\n' },
+      { label: 'うれしかったこと', text: '【うれしかったこと】\n\n' },
+      { label: 'ありがとう', text: '【ありがとう】\n今日、ありがとうと思ったこと：\n' },
+      { label: '行った場所・食べたもの', text: '【行った場所】\n\n【食べたもの】\n\n【感想】\n' },
+      { label: '明日やりたいこと', text: '【明日やりたいこと】\n・\n・\n' }
+    ];
 
-    // 日付の範囲（カレンダー・日記・記念日で共通）
     const CAL_MIN_YEAR = 2000;
     const CAL_MAX_YEAR = 2100;
     const DATE_MIN = `${CAL_MIN_YEAR}-01-01`;
@@ -564,10 +680,6 @@
     function isDateInRange(dateStr) {
       return typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateStr) && dateStr >= DATE_MIN && dateStr <= DATE_MAX;
     }
-
-    // タグ絞り込みボタンの見た目
-    const CHIP_ON = 'tag-chip active shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold bg-roseAccent text-white transition';
-    const CHIP_OFF = 'tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition';
 
     // ---------- localStorage（使えない環境ではメモリで代用） ----------
     const memStore = {};
@@ -593,20 +705,19 @@
 
     let diaryEntries = [];
     let entriesLoaded = false;
-    let userSettings = { anniversaryDate: '' };
+    let userSettings = { anniversaryDate: '', nameA: '', nameB: '' };
 
     let currentCalYear, currentCalMonth;
     let selectedDateStr = '';
     let currentTagFilter = 'すべて';
+    let adv = { from: '', to: '', sort: 'desc', author: '' };
     let pendingDeleteId = null;
-    let pendingImport = null; // 読み込み待ちの内容
+    let pendingImport = null;
 
     let pinHash = '';
     let enteredPin = '';
-    let isUnlocked = false;
     let pinChecking = false;
 
-    // エディタ状態
     let editingId = '';
     let editingCreatedAt = '';
     let editorDirty = false;
@@ -629,14 +740,28 @@
       return `${y}年${m}月${d}日 (${weekdays[dt.getDay()]})`;
     }
 
-    function getTagEmoji(tag) {
-      const map = { 'デート': '💕', '記念日': '🎂', '旅行': '✈️', '幸せ': '🥰', '日常': '☕' };
-      return map[tag] || '🌸';
+    function dayNum(y, m, d) { return Math.floor(Date.UTC(y, m - 1, d) / 86400000); }
+    function dayNumOfStr(s) { const [y, m, d] = s.split('-').map(Number); return dayNum(y, m, d); }
+    function strOfDayNum(n) {
+      const dt = new Date(n * 86400000);
+      return `${dt.getUTCFullYear()}年${dt.getUTCMonth() + 1}月${dt.getUTCDate()}日`;
     }
+    function todayNum() { const t = new Date(); return dayNum(t.getFullYear(), t.getMonth() + 1, t.getDate()); }
+
+    function getTagEmoji(tag) { return TAG_EMOJI[tag] || '🌸'; }
 
     function escapeHtml(str) {
       if (str === null || str === undefined) return '';
       return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    // 検索語を強調（安全のため、先にエスケープしてから <mark> を付ける）
+    function hl(text, words) {
+      const s = String(text ?? '');
+      if (!words.length) return escapeHtml(s);
+      const sorted = [...words].sort((a, b) => b.length - a.length);
+      const re = new RegExp('(' + sorted.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'gi');
+      return s.split(re).map((p, i) => i % 2 === 1 ? `<mark>${escapeHtml(p)}</mark>` : escapeHtml(p)).join('');
     }
 
     function newId() {
@@ -656,7 +781,6 @@
           return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 40);
         }
       } catch (e) { /* フォールバックへ */ }
-      // フォールバック（cyrb53）
       let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
       for (let i = 0; i < text.length; i++) {
         const ch = text.charCodeAt(i);
@@ -707,16 +831,43 @@
       dot.className = `w-2 h-2 shrink-0 rounded-full inline-block ${colors[status] || 'bg-amber-400'}`;
     }
 
-    // ---------- ファビコン：PNG版を作って設定（Safari・iPhoneホーム画面用） ----------
+    // ---------- 表示設定（ダークモード・文字サイズ） ----------
+    function applyTheme() {
+      const t = lsGet(LS.theme) || 'auto';
+      const dark = t === 'dark' || (t === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.classList.toggle('dark', dark);
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', dark ? '#1E1A18' : '#FAF8F5');
+    }
+    function applyFontSize() {
+      const f = lsGet(LS.fontSize) || 'm';
+      if (f === 'm') document.documentElement.removeAttribute('data-fs');
+      else document.documentElement.setAttribute('data-fs', f);
+    }
+    window.setTheme = function (v) { lsSet(LS.theme, v); applyTheme(); renderDisplayButtons(); };
+    window.setFontSize = function (v) { lsSet(LS.fontSize, v); applyFontSize(); renderDisplayButtons(); };
+
+    function renderDisplayButtons() {
+      const theme = lsGet(LS.theme) || 'auto';
+      const fs_ = lsGet(LS.fontSize) || 'm';
+      const on = 'flex-1 py-2.5 rounded-xl bg-roseAccent text-white text-xs font-bold transition';
+      const off = 'flex-1 py-2.5 rounded-xl bg-cream hover:bg-roseLight border border-ivory text-cocoa text-xs font-medium transition';
+      document.getElementById('themeBtns').innerHTML = [['auto', '自動'], ['light', 'ライト'], ['dark', 'ダーク']]
+        .map(([v, l]) => `<button type="button" onclick="setTheme('${v}')" class="${theme === v ? on : off}">${l}</button>`).join('');
+      document.getElementById('fontBtns').innerHTML = [['s', '小'], ['m', '標準'], ['l', '大']]
+        .map(([v, l]) => `<button type="button" onclick="setFontSize('${v}')" class="${fs_ === v ? on : off}">${l}</button>`).join('');
+    }
+    if (window.matchMedia) {
+      matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if ((lsGet(LS.theme) || 'auto') === 'auto') applyTheme(); });
+    }
+
+    // ---------- ファビコン ----------
     function makeEmojiPng(size, bg) {
       const c = document.createElement('canvas');
       c.width = size;
       c.height = size;
       const ctx = c.getContext('2d');
-      if (bg) {
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, size, size);
-      }
+      if (bg) { ctx.fillStyle = bg; ctx.fillRect(0, 0, size, size); }
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = `${Math.floor(size * 0.72)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
@@ -736,10 +887,9 @@
         };
         add('icon', makeEmojiPng(64, null), '64x64');
         add('apple-touch-icon', makeEmojiPng(180, '#FAF8F5'), '180x180');
-      } catch (e) { /* アイコン作成に失敗しても動作に影響なし */ }
+      } catch (e) { /* noop */ }
     }
 
-    // ---------- モーダル表示中は背面のスクロールを止める ----------
     function setupBodyScrollLock() {
       const ids = ['pinLockOverlay', 'editorModal', 'settingsModal', 'syncModal', 'deleteConfirmModal'];
       const update = () => {
@@ -806,7 +956,7 @@
       } else if (mode === 'local') {
         userSettings = { ...userSettings, ...data };
         persistLocal();
-        updateStatsDashboard();
+        renderAll();
       } else {
         throw new Error('not-ready');
       }
@@ -818,10 +968,12 @@
       if (unsubPrefs) { unsubPrefs(); unsubPrefs = null; }
     }
 
+    const defaultPrefs = () => ({ anniversaryDate: '', nameA: '', nameB: '' });
+
     function startLocalMode() {
       mode = 'local';
       try { diaryEntries = JSON.parse(lsGet(LS.entries) || '[]'); } catch (e) { diaryEntries = []; }
-      try { userSettings = { anniversaryDate: '', ...JSON.parse(lsGet(LS.prefs) || '{}') }; } catch (e) { userSettings = { anniversaryDate: '' }; }
+      try { userSettings = { ...defaultPrefs(), ...JSON.parse(lsGet(LS.prefs) || '{}') }; } catch (e) { userSettings = defaultPrefs(); }
       sortEntries();
       entriesLoaded = true;
       updateSyncStatus('local', 'この端末だけに自動保存中（共有は未接続）');
@@ -833,7 +985,7 @@
       spaceId = await hashString('space:' + normalizeCode(syncCode));
       entriesLoaded = false;
       diaryEntries = [];
-      userSettings = { anniversaryDate: '' };
+      userSettings = defaultPrefs();
       renderAll();
       updateSyncStatus('connecting', '同期を開始しています...');
 
@@ -852,8 +1004,8 @@
       });
 
       unsubPrefs = fs.onSnapshot(prefsDocRef(), (snap) => {
-        userSettings = snap.exists() ? { anniversaryDate: '', ...snap.data() } : { anniversaryDate: '' };
-        updateStatsDashboard();
+        userSettings = snap.exists() ? { ...defaultPrefs(), ...snap.data() } : defaultPrefs();
+        renderAll();
       }, (error) => {
         console.error('Prefs snapshot error:', error);
       });
@@ -901,6 +1053,21 @@
     }
 
     // ---------- パスコードロック ----------
+    function buildPinPad() {
+      const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'];
+      document.getElementById('pinPad').innerHTML = keys.map(k => {
+        if (k === '') return '<div class="h-14"></div>';
+        if (k === 'del') return '<button type="button" data-pin="del" class="h-14 rounded-2xl bg-ivory/70 hover:bg-ivory active:scale-95 text-base text-taupe transition flex items-center justify-center" aria-label="削除"><i class="fa-solid fa-delete-left"></i></button>';
+        return `<button type="button" data-pin="${k}" class="h-14 rounded-2xl bg-cream hover:bg-roseLight active:scale-95 text-lg font-bold text-cocoa transition">${k}</button>`;
+      }).join('');
+      document.getElementById('pinPad').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-pin]');
+        if (!b) return;
+        if (b.dataset.pin === 'del') window.handlePinDelete();
+        else window.handlePinKey(b.dataset.pin);
+      });
+    }
+
     function showLock() {
       enteredPin = '';
       updatePinDots();
@@ -917,7 +1084,6 @@
         const h = await hashString('pin:' + enteredPin);
         pinChecking = false;
         if (h === pinHash) {
-          isUnlocked = true;
           document.getElementById('pinLockOverlay').classList.add('hidden');
           enteredPin = '';
           updatePinDots();
@@ -970,7 +1136,6 @@
       if (cleaned.length === 4) {
         pinHash = await hashString('pin:' + cleaned);
         lsSet(LS.pin, pinHash);
-        isUnlocked = true;
         el.value = '';
         refreshPinStatus();
         showToast('パスコードを設定しました');
@@ -983,6 +1148,13 @@
       refreshPinStatus();
       showToast('パスコードロックを解除しました');
     };
+
+    // ---------- 名前・書いた人 ----------
+    function getNames() { return [userSettings.nameA, userSettings.nameB].map(s => (s || '').trim()).filter(Boolean); }
+    function getMyName() {
+      const me = lsGet(LS.me) || 'A';
+      return ((me === 'B' ? userSettings.nameB : userSettings.nameA) || '').trim();
+    }
 
     // ---------- 統計 ----------
     function updateStatsDashboard() {
@@ -1008,11 +1180,9 @@
 
       const daysEl = document.getElementById('daysTogetherCount');
       const subEl = document.getElementById('anniversarySubtext');
-      if (userSettings.anniversaryDate) {
+      if (isDateInRange(userSettings.anniversaryDate)) {
         const [ay, am, ad] = userSettings.anniversaryDate.split('-').map(Number);
-        const startUtc = Date.UTC(ay, am - 1, ad);
-        const nowUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-        const diffDays = Math.floor((nowUtc - startUtc) / 86400000) + 1; // 当日を1日目とする
+        const diffDays = todayNum() - dayNum(ay, am, ad) + 1; // 当日を1日目とする
         if (diffDays >= 1) {
           daysEl.textContent = diffDays.toLocaleString();
           subEl.textContent = `記念日: ${ay}/${am}/${ad}`;
@@ -1024,6 +1194,140 @@
         daysEl.textContent = '--';
         subEl.textContent = 'タップして記念日を設定';
       }
+    }
+
+    // ---------- 節目・連続記録・去年の今日 ----------
+    function calcStreaks() {
+      const tn = todayNum();
+      const set = new Set();
+      diaryEntries.forEach(e => {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(e.date || '')) {
+          const n = dayNumOfStr(e.date);
+          if (n <= tn) set.add(n);
+        }
+      });
+      const nums = [...set].sort((a, b) => a - b);
+      let longest = 0, run = 0, prev = null;
+      nums.forEach(n => {
+        run = (prev !== null && n === prev + 1) ? run + 1 : 1;
+        if (run > longest) longest = run;
+        prev = n;
+      });
+      const todayHas = set.has(tn);
+      let cursor = todayHas ? tn : (set.has(tn - 1) ? tn - 1 : null);
+      let current = 0;
+      while (cursor !== null && set.has(cursor)) { current++; cursor--; }
+      return { current, longest, todayHas };
+    }
+
+    function updateInsights() {
+      const ms = document.getElementById('milestoneCard');
+      const sk = document.getElementById('streakCard');
+
+      // 連続記録
+      if (!entriesLoaded) {
+        sk.innerHTML = '<p class="text-xs text-taupe">読み込み中...</p>';
+      } else {
+        const s = calcStreaks();
+        const year = String(new Date().getFullYear());
+        const yearCount = diaryEntries.filter(e => (e.date || '').startsWith(year)).length;
+        const hint = s.todayHas ? '今日も書けています ✓' : (s.current > 0 ? '今日書くと記録がのびます' : '今日書いて記録をはじめよう');
+        sk.innerHTML = `
+          <p class="text-[11px] sm:text-xs font-medium text-taupe mb-1">🔥 連続記録</p>
+          <div><span class="text-2xl sm:text-3xl font-bold font-journal text-roseDark">${s.current}</span><span class="text-xs sm:text-sm text-cocoa ml-1">日連続</span></div>
+          <p class="text-[11px] sm:text-xs text-taupe mt-1">最長 ${s.longest}日 ・ 今年 ${yearCount}件</p>
+          <p class="text-[11px] text-roseDark mt-0.5">${hint}</p>`;
+      }
+
+      // 記念日の節目
+      if (!isDateInRange(userSettings.anniversaryDate)) {
+        ms.innerHTML = `
+          <p class="text-[11px] sm:text-xs font-medium text-taupe mb-1">🎉 ふたりの節目</p>
+          <p class="text-sm text-cocoa">記念日を設定すると、100日ごとや周年をお知らせします。</p>
+          <button type="button" onclick="openSettingsModal()" class="mt-2 text-[11px] text-roseDark hover:underline">記念日を設定する</button>`;
+        return;
+      }
+      const [ay, am, ad] = userSettings.anniversaryDate.split('-').map(Number);
+      const tn = todayNum();
+      const startNum = dayNum(ay, am, ad);
+      const n = tn - startNum + 1;
+      if (n < 1) {
+        ms.innerHTML = `
+          <p class="text-[11px] sm:text-xs font-medium text-taupe mb-1">🎉 ふたりの節目</p>
+          <p class="text-sm text-cocoa">記念日まであと <b class="text-roseDark">${startNum - tn}</b> 日（${ay}年${am}月${ad}日）</p>`;
+        return;
+      }
+      const lines = [];
+      let celebrate = '';
+      const next100 = Math.ceil(n / 100) * 100;
+      const until100 = next100 - n;
+      if (until100 === 0) celebrate = `今日は ${n} 日目の記念日です！`;
+      else lines.push(`<b class="text-roseDark">${next100}日目</b>まで あと ${until100}日（${strOfDayNum(startNum + next100 - 1)}）`);
+
+      let yearLine = '';
+      for (let y = new Date().getFullYear(); y <= new Date().getFullYear() + 2; y++) {
+        if (y <= ay) continue;
+        const num = dayNum(y, am, ad);
+        if (num < tn) continue;
+        const years = y - ay;
+        if (num === tn) celebrate = (celebrate ? celebrate + ' ' : '') + `今日は ${years} 周年です！`;
+        else yearLine = `<b class="text-roseDark">${years}周年</b>まで あと ${num - tn}日（${y}年${am}月${ad}日）`;
+        break;
+      }
+      if (yearLine) lines.push(yearLine);
+
+      ms.innerHTML = `
+        <p class="text-[11px] sm:text-xs font-medium text-taupe mb-1">🎉 ふたりの節目</p>
+        ${celebrate ? `<p class="text-sm font-bold text-roseDark mb-1">🎊 ${escapeHtml(celebrate)}</p>` : ''}
+        <p class="text-sm text-cocoa space-y-0.5">${lines.map(l => `<span class="block">${l}</span>`).join('')}</p>`;
+    }
+
+    function renderOnThisDay() {
+      const box = document.getElementById('onThisDayCard');
+      if (!entriesLoaded) { box.classList.add('hidden'); return; }
+      const now = new Date();
+      const md = `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const ty = now.getFullYear();
+      const list = diaryEntries
+        .filter(e => /^\d{4}-\d{2}-\d{2}$/.test(e.date || '') && e.date.slice(5) === md && Number(e.date.slice(0, 4)) < ty)
+        .sort((a, b) => b.date.localeCompare(a.date));
+      if (!list.length) { box.classList.add('hidden'); return; }
+      box.classList.remove('hidden');
+      box.innerHTML = `
+        <p class="text-[11px] sm:text-xs font-bold text-roseAccent mb-2">📅 この日の思い出（${now.getMonth() + 1}月${now.getDate()}日）</p>
+        <div class="space-y-2">
+          ${list.slice(0, 5).map(e => `
+            <div data-action="jump" data-date="${escapeHtml(e.date)}" class="cursor-pointer flex items-start gap-3 rounded-xl bg-cream/60 hover:bg-roseLight/40 border border-ivory px-3.5 py-2.5 transition">
+              <span class="shrink-0 text-xs font-bold text-roseDark whitespace-nowrap pt-0.5">${ty - Number(e.date.slice(0, 4))}年前</span>
+              <div class="min-w-0">
+                <p class="font-journal font-bold text-sm text-cocoa truncate">${e.mood ? escapeHtml(e.mood) + ' ' : ''}${escapeHtml(e.title)}</p>
+                <p class="text-xs text-taupe line-clamp-2 leading-relaxed break-words">${escapeHtml(e.content)}</p>
+              </div>
+            </div>`).join('')}
+        </div>
+        ${list.length > 5 ? `<p class="text-[11px] text-taupe mt-2">ほか ${list.length - 5} 件</p>` : ''}`;
+    }
+
+    // ---------- 書き忘れのお知らせ ----------
+    function renderReminder() {
+      const box = document.getElementById('reminderBanner');
+      if (!entriesLoaded || !canSave()) { box.classList.add('hidden'); return; }
+      const today = formatDateISO(new Date());
+      const wrote = diaryEntries.some(e => e.date === today);
+      if (wrote || lsGet(LS.reminder) === today) { box.classList.add('hidden'); return; }
+      const s = calcStreaks();
+      box.classList.remove('hidden');
+      box.innerHTML = `
+        <div class="rounded-2xl bg-roseLight/60 border border-roseAccent/30 px-4 py-3.5 flex flex-wrap items-center gap-3">
+          <div class="flex-1 min-w-[12rem]">
+            <p class="text-sm font-bold text-cocoa">📝 今日の日記は、まだ書かれていません</p>
+            <p class="text-[11px] text-taupe mt-0.5">${s.current > 0 ? `いま ${s.current}日連続です。今日も一言だけ残しませんか？` : 'ひとことだけでも、今日の思い出を残しませんか？'}</p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button type="button" data-action="dismiss-reminder" class="px-3 py-2 rounded-xl bg-white/70 border border-ivory text-taupe text-xs font-bold">あとで</button>
+            <button type="button" data-action="write" data-date="${today}" class="px-4 py-2 rounded-xl bg-roseAccent hover:bg-roseDark text-white text-xs font-bold">今日を書く</button>
+          </div>
+        </div>`;
     }
 
     // ---------- カレンダー ----------
@@ -1070,7 +1374,13 @@
       const firstDay = new Date(currentCalYear, currentCalMonth, 1).getDay();
       const daysInMonth = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
       const todayStr = formatDateISO(new Date());
-      const datesWithEntries = new Set(diaryEntries.map(e => e.date));
+
+      const info = {};
+      diaryEntries.forEach(e => {
+        const o = info[e.date] || (info[e.date] = { count: 0, fav: false });
+        o.count++;
+        if (e.favorite) o.fav = true;
+      });
 
       for (let i = 0; i < firstDay; i++) {
         const empty = document.createElement('div');
@@ -1082,7 +1392,7 @@
         const dateStr = `${currentCalYear}-${String(currentCalMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const isSelected = dateStr === selectedDateStr;
         const isToday = dateStr === todayStr;
-        const hasEntry = datesWithEntries.has(dateStr);
+        const it = info[dateStr];
 
         const btn = document.createElement('button');
         btn.type = 'button';
@@ -1094,14 +1404,46 @@
         else cls += 'hover:bg-cream text-cocoa';
         btn.className = cls;
 
-        btn.innerHTML = `
-          <span>${day}</span>
-          ${hasEntry
-            ? `<i class="fa-solid fa-heart text-[9px] mt-0.5 ${isSelected ? 'text-white' : 'text-roseAccent'}"></i>`
-            : '<span class="h-[9px] mt-0.5"></span>'}
-        `;
+        let mark = '<span class="h-[10px] mt-0.5"></span>';
+        if (it) {
+          const op = it.count >= 3 ? 1 : (it.count === 2 ? 0.8 : 0.5);
+          const size = it.count >= 3 ? 'text-[11px]' : 'text-[9px]';
+          mark = `<span class="flex items-center gap-px mt-0.5 leading-none">
+            <i class="fa-solid fa-heart ${size} ${isSelected ? 'text-white' : 'text-roseAccent'}" style="opacity:${op}"></i>
+            ${it.fav ? `<i class="fa-solid fa-star text-[8px] ${isSelected ? 'text-white' : 'text-amber-400'}"></i>` : ''}
+          </span>`;
+        }
+        btn.innerHTML = `<span>${day}</span>${mark}`;
         grid.appendChild(btn);
       }
+      renderMoodSummary();
+    }
+
+    // その月の気分の流れ
+    function renderMoodSummary() {
+      const box = document.getElementById('moodSummary');
+      const prefix = `${currentCalYear}-${String(currentCalMonth + 1).padStart(2, '0')}`;
+      const list = diaryEntries
+        .filter(e => e.mood && (e.date || '').startsWith(prefix))
+        .sort((a, b) => a.date.localeCompare(b.date) || (a.createdAt || '').localeCompare(b.createdAt || ''));
+      if (!list.length) {
+        box.innerHTML = `<p class="text-[11px] text-taupe">${currentCalMonth + 1}月は、気分の記録がまだありません。</p>`;
+        return;
+      }
+      const counts = {};
+      list.forEach(e => { counts[e.mood] = (counts[e.mood] || 0) + 1; });
+      box.innerHTML = `
+        <p class="text-[11px] font-bold text-taupe mb-2">${currentCalMonth + 1}月の気分の流れ</p>
+        <div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+          ${list.map(e => `
+            <button type="button" data-action="jump" data-date="${escapeHtml(e.date)}" class="shrink-0 flex flex-col items-center rounded-lg px-1.5 py-1 hover:bg-roseLight/60 transition">
+              <span class="text-lg leading-none">${escapeHtml(e.mood)}</span>
+              <span class="text-[9px] text-taupe mt-0.5">${Number(e.date.slice(8, 10))}日</span>
+            </button>`).join('')}
+        </div>
+        <div class="flex flex-wrap gap-1.5 mt-1.5">
+          ${Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([m, c]) => `<span class="px-2 py-0.5 rounded-full bg-cream border border-ivory text-[11px] text-cocoa">${escapeHtml(m)} ${c}</span>`).join('')}
+        </div>`;
     }
 
     window.changeMonth = function (delta) {
@@ -1145,13 +1487,18 @@
         const t = e.changedTouches[0];
         const dx = t.clientX - sx;
         const dy = t.clientY - sy;
-        if (Math.abs(dx) > 60 && Math.abs(dy) < 40) {
-          window.changeMonth(dx < 0 ? 1 : -1);
-        }
+        if (Math.abs(dx) > 60 && Math.abs(dy) < 40) window.changeMonth(dx < 0 ? 1 : -1);
       }, { passive: true });
     }
 
     // ---------- 選択日の日記 ----------
+    function metaBadges(entry) {
+      return `
+        <span class="inline-block px-2.5 py-0.5 rounded-full bg-roseLight text-roseDark text-[11px] font-bold">${getTagEmoji(entry.tag)} ${escapeHtml(entry.tag || '日常')}</span>
+        ${entry.mood ? `<span class="text-base leading-none" title="気分">${escapeHtml(entry.mood)}</span>` : ''}
+        ${entry.author ? `<span class="px-2 py-0.5 rounded-full bg-cream border border-ivory text-taupe text-[11px] font-medium"><i class="fa-solid fa-user text-[9px] mr-1"></i>${escapeHtml(entry.author)}</span>` : ''}`;
+    }
+
     function renderSelectedDateCard() {
       const container = document.getElementById('selectedDateCard');
       const dayEntries = diaryEntries
@@ -1189,12 +1536,13 @@
             <article class="space-y-3">
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
-                  <span class="inline-block px-2.5 py-0.5 rounded-full bg-roseLight text-roseDark text-[11px] font-bold mb-1.5">
-                    ${getTagEmoji(entry.tag)} ${escapeHtml(entry.tag || '日常')}
-                  </span>
+                  <div class="flex flex-wrap items-center gap-1.5 mb-1.5">${metaBadges(entry)}</div>
                   <h3 class="font-journal text-base sm:text-lg font-bold text-cocoa leading-snug break-words">${escapeHtml(entry.title)}</h3>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
+                  <button type="button" data-action="fav" data-id="${escapeHtml(entry.id)}" class="w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-cream hover:bg-ivory flex items-center justify-center text-xs transition ${entry.favorite ? 'text-amber-400' : 'text-taupe'}" title="お気に入り" aria-label="お気に入り">
+                    <i class="${entry.favorite ? 'fa-solid' : 'fa-regular'} fa-star"></i>
+                  </button>
                   <button type="button" data-action="edit" data-id="${escapeHtml(entry.id)}" class="w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-cream hover:bg-ivory text-taupe hover:text-cocoa flex items-center justify-center text-xs transition" title="編集" aria-label="編集">
                     <i class="fa-solid fa-pen"></i>
                   </button>
@@ -1210,12 +1558,31 @@
       `;
     }
 
+    window.toggleFavorite = async function (id) {
+      const e = diaryEntries.find(x => x.id === id);
+      if (!e) return;
+      const next = !e.favorite;
+      try {
+        await saveEntryData(id, { favorite: next, updatedAt: new Date().toISOString() });
+        showToast(next ? '★ お気に入りに入れました' : 'お気に入りを外しました');
+      } catch (err) {
+        console.error('Favorite error:', err);
+        showToast('変更できませんでした', true);
+      }
+    };
+
     // ---------- 検索・一覧 ----------
+    function renderTagChips() {
+      const on = 'tag-chip active shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold bg-roseAccent text-white transition';
+      const off = 'tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition';
+      const items = [['すべて', 'すべて'], ['★', '★ お気に入り'], ...TAGS.map(t => [t, `${TAG_EMOJI[t]} ${t}`])];
+      document.getElementById('filterTagsContainer').innerHTML = items
+        .map(([v, l]) => `<button type="button" onclick="setTagFilter('${v}')" class="${currentTagFilter === v ? on : off}">${l}</button>`).join('');
+    }
+
     window.setTagFilter = function (tag) {
       currentTagFilter = tag;
-      document.querySelectorAll('.tag-chip').forEach(btn => {
-        btn.className = btn.dataset.tag === tag ? CHIP_ON : CHIP_OFF;
-      });
+      renderTagChips();
       renderTimeline();
     };
 
@@ -1231,18 +1598,66 @@
       renderTimeline();
     };
 
+    window.toggleAdvanced = function () {
+      document.getElementById('advPanel').classList.toggle('hidden');
+    };
+
+    window.applyAdvanced = function () {
+      adv.from = document.getElementById('filterFrom').value;
+      adv.to = document.getElementById('filterTo').value;
+      adv.sort = document.getElementById('filterSort').value;
+      adv.author = document.getElementById('filterAuthor').value;
+      updateAdvBadge();
+      renderTimeline();
+    };
+
+    window.resetAdvanced = function () {
+      adv = { from: '', to: '', sort: 'desc', author: '' };
+      document.getElementById('filterFrom').value = '';
+      document.getElementById('filterTo').value = '';
+      document.getElementById('filterSort').value = 'desc';
+      document.getElementById('filterAuthor').value = '';
+      updateAdvBadge();
+      renderTimeline();
+    };
+
+    function updateAdvBadge() {
+      const n = (adv.from ? 1 : 0) + (adv.to ? 1 : 0) + (adv.sort !== 'desc' ? 1 : 0) + (adv.author ? 1 : 0);
+      const b = document.getElementById('advBadge');
+      b.textContent = String(n);
+      b.classList.toggle('hidden', n === 0);
+    }
+
+    function renderAuthorFilter() {
+      const sel = document.getElementById('filterAuthor');
+      const names = new Set(getNames());
+      diaryEntries.forEach(e => { if (e.author) names.add(e.author); });
+      const prev = adv.author;
+      sel.innerHTML = '<option value="">全員</option>' + [...names].map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+      sel.value = names.has(prev) ? prev : '';
+      if (!names.has(prev)) adv.author = '';
+    }
+
     function renderTimeline() {
       const container = document.getElementById('entriesTimeline');
-      const keyword = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      const words = (document.getElementById('searchInput').value || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
 
-      const filtered = diaryEntries.filter(entry => {
-        const matchTag = currentTagFilter === 'すべて' || entry.tag === currentTagFilter;
-        const matchKeyword = !keyword ||
-          (entry.title || '').toLowerCase().includes(keyword) ||
-          (entry.content || '').toLowerCase().includes(keyword) ||
-          (entry.tag || '').toLowerCase().includes(keyword) ||
-          (entry.date || '').includes(keyword);
-        return matchTag && matchKeyword;
+      const filtered = diaryEntries.filter(e => {
+        if (currentTagFilter === '★') { if (!e.favorite) return false; }
+        else if (currentTagFilter !== 'すべて' && e.tag !== currentTagFilter) return false;
+        if (adv.from && (e.date || '') < adv.from) return false;
+        if (adv.to && (e.date || '') > adv.to) return false;
+        if (adv.author && e.author !== adv.author) return false;
+        if (words.length) {
+          const hay = [e.title, e.content, e.tag, e.author, e.mood, e.date].join('\n').toLowerCase();
+          if (!words.every(w => hay.includes(w))) return false;
+        }
+        return true;
+      });
+
+      filtered.sort((a, b) => {
+        const c = (a.date || '').localeCompare(b.date || '') || (a.createdAt || '').localeCompare(b.createdAt || '');
+        return adv.sort === 'asc' ? c : -c;
       });
 
       document.getElementById('filteredCountBadge').textContent = `${filtered.length} 件表示`;
@@ -1252,7 +1667,7 @@
           <div class="text-center py-10 sm:py-12 px-4 bg-cream/50 rounded-2xl border border-dashed border-ivory">
             <i class="fa-regular fa-face-smile text-3xl text-taupe/60 mb-2"></i>
             <p class="text-sm font-bold text-cocoa mb-1">該当する思い出が見つかりませんでした</p>
-            <p class="text-xs text-taupe">別のキーワードで検索するか、「日記を書く」から新しい思い出を追加しましょう。</p>
+            <p class="text-xs text-taupe">条件を変えるか、「日記を書く」から新しい思い出を追加しましょう。</p>
           </div>
         `;
         return;
@@ -1266,10 +1681,14 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-2 mb-1">
               <span class="text-[11px] font-bold text-roseDark truncate">${formatDateJapanese(entry.date)}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-white text-taupe border border-ivory shrink-0">${escapeHtml(entry.tag || '日常')}</span>
+              <span class="flex items-center gap-1.5 shrink-0">
+                ${entry.favorite ? '<i class="fa-solid fa-star text-[10px] text-amber-400"></i>' : ''}
+                ${entry.mood ? `<span class="text-sm leading-none">${escapeHtml(entry.mood)}</span>` : ''}
+                ${entry.author ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-white text-taupe border border-ivory">${escapeHtml(entry.author)}</span>` : ''}
+              </span>
             </div>
-            <h4 class="font-journal font-bold text-sm sm:text-base text-cocoa truncate group-hover:text-roseDark transition">${escapeHtml(entry.title)}</h4>
-            <p class="text-xs text-taupe line-clamp-2 mt-1 leading-relaxed break-words">${escapeHtml(entry.content)}</p>
+            <h4 class="font-journal font-bold text-sm sm:text-base text-cocoa truncate group-hover:text-roseDark transition">${hl(entry.title, words)}</h4>
+            <p class="text-xs text-taupe line-clamp-2 mt-1 leading-relaxed break-words">${hl(entry.content, words)}</p>
           </div>
         </div>
       `).join('');
@@ -1283,10 +1702,8 @@
       selectedDateStr = dateStr;
       renderCalendar();
       renderSelectedDateCard();
-      if (window.innerWidth < 1024) {
-        window.switchMobileTab('calendar');
-        document.getElementById('selectedDateCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
+      if (window.innerWidth < 1024) window.switchMobileTab('calendar');
+      document.getElementById('selectedDateCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     };
 
     window.switchMobileTab = function (tab) {
@@ -1311,6 +1728,48 @@
     };
 
     // ---------- 日記エディタ（自動保存） ----------
+    function buildEditorControls() {
+      document.getElementById('editorTagGrid').innerHTML = TAGS.map((t, i) => `
+        <label class="cursor-pointer">
+          <input type="radio" name="entryTag" value="${t}" class="peer sr-only" ${i === 0 ? 'checked' : ''}>
+          <div class="text-center py-2 px-1 rounded-xl bg-cream border border-ivory peer-checked:bg-roseLight peer-checked:border-roseAccent peer-checked:text-roseDark text-xs font-medium transition">${TAG_EMOJI[t]}<br>${t}</div>
+        </label>`).join('');
+
+      document.getElementById('editorMoodGrid').innerHTML = [['', 'なし'], ...MOODS].map(([v, l], i) => `
+        <label class="cursor-pointer">
+          <input type="radio" name="entryMood" value="${v}" class="peer sr-only" ${i === 0 ? 'checked' : ''}>
+          <div title="${l}" class="min-w-[2.75rem] text-center py-2 px-2.5 rounded-xl bg-cream border border-ivory peer-checked:bg-roseLight peer-checked:border-roseAccent text-base transition">${v || '<span class="text-xs text-taupe">なし</span>'}</div>
+        </label>`).join('');
+
+      document.getElementById('templateSelect').innerHTML = '<option value="">テンプレート ▼</option>' +
+        TEMPLATES.map((t, i) => `<option value="${i}">${t.label}</option>`).join('');
+    }
+
+    window.applyTemplate = function (sel) {
+      if (sel.value === '') return;
+      const t = TEMPLATES[Number(sel.value)];
+      sel.value = '';
+      if (!t) return;
+      const ta = document.getElementById('entryContentInput');
+      const cur = ta.value.replace(/\s+$/, '');
+      ta.value = cur ? cur + '\n\n' + t.text : t.text;
+      ta.focus();
+      ta.setSelectionRange(ta.value.length, ta.value.length);
+      window.handleEditorInput();
+    };
+
+    function renderAuthorOptions(selected, extra) {
+      const names = getNames();
+      if (extra && !names.includes(extra)) names.push(extra);
+      const field = document.getElementById('authorField');
+      field.classList.toggle('hidden', names.length === 0);
+      document.getElementById('authorOptions').innerHTML = names.map(n => `
+        <label class="cursor-pointer">
+          <input type="radio" name="entryAuthor" value="${escapeHtml(n)}" class="peer sr-only" ${n === selected ? 'checked' : ''}>
+          <div class="px-3.5 py-2 rounded-xl bg-cream border border-ivory peer-checked:bg-roseLight peer-checked:border-roseAccent peer-checked:text-roseDark text-xs font-medium transition">${escapeHtml(n)}</div>
+        </label>`).join('');
+    }
+
     function setSaveIndicator(state) {
       const el = document.getElementById('saveIndicator');
       const map = {
@@ -1346,6 +1805,7 @@
       let date = (typeof dateStr === 'string' && dateStr) ? dateStr : (selectedDateStr || formatDateISO(new Date()));
       if (!isDateInRange(date)) date = formatDateISO(new Date());
       resetEditorForm(date);
+      renderAuthorOptions(getMyName(), '');
       document.getElementById('editorModalTitle').textContent = '新しい思い出を記録する';
       document.getElementById('editorModal').classList.remove('hidden');
       setTimeout(() => document.getElementById('entryTitleInput').focus(), 50);
@@ -1361,6 +1821,9 @@
       document.getElementById('entryTitleInput').value = entry.title === '（無題）' ? '' : (entry.title || '');
       document.getElementById('entryContentInput').value = entry.content || '';
       document.querySelectorAll('input[name="entryTag"]').forEach(r => { r.checked = (r.value === entry.tag); });
+      document.querySelectorAll('input[name="entryMood"]').forEach(r => { r.checked = (r.value === (entry.mood || '')); });
+      document.getElementById('entryFavInput').checked = !!entry.favorite;
+      renderAuthorOptions(entry.author || '', entry.author || '');
       document.getElementById('editorModalTitle').textContent = '思い出を編集する';
       document.getElementById('editorModal').classList.remove('hidden');
     };
@@ -1398,6 +1861,8 @@
       }
 
       const tagEl = document.querySelector('input[name="entryTag"]:checked');
+      const moodEl = document.querySelector('input[name="entryMood"]:checked');
+      const authorEl = document.querySelector('input[name="entryAuthor"]:checked');
       const nowIso = new Date().toISOString();
       if (!editingId) editingId = newId();
       if (!editingCreatedAt) editingCreatedAt = nowIso;
@@ -1408,6 +1873,9 @@
         title: title || '（無題）',
         content,
         tag: tagEl ? tagEl.value : '日常',
+        mood: moodEl ? moodEl.value : '',
+        author: authorEl ? authorEl.value : '',
+        favorite: document.getElementById('entryFavInput').checked,
         createdAt: editingCreatedAt,
         updatedAt: nowIso
       };
@@ -1479,13 +1947,10 @@
       }
     };
 
-    // ---------- バックアップ（テキスト書き出し） ----------
+    // ---------- バックアップ（書き出し） ----------
     function updateUsageText() {
       const el = document.getElementById('storageUsageText');
-      if (!entriesLoaded) {
-        el.textContent = '読み込み中...';
-        return;
-      }
+      if (!entriesLoaded) { el.textContent = '読み込み中...'; return; }
       const bytes = new Blob([JSON.stringify(diaryEntries)]).size;
       const kb = bytes / 1024;
       const sizeText = kb < 1024 ? `${kb.toFixed(1)} KB` : `${(kb / 1024).toFixed(2)} MB`;
@@ -1515,15 +1980,14 @@
       ];
       if (userSettings.anniversaryDate) head.push(`記念日: ${userSettings.anniversaryDate}`);
 
-      const blocks = list.map(e => [
-        line,
-        `日付: ${formatDateJapanese(e.date)}`,
-        `項目: ${e.tag || '日常'}`,
-        `タイトル: ${e.title || ''}`,
-        thin,
-        e.content || '',
-        ''
-      ].join('\n'));
+      const blocks = list.map(e => {
+        const rows = [line, `日付: ${formatDateJapanese(e.date)}`, `項目: ${e.tag || '日常'}`];
+        if (e.author) rows.push(`書いた人: ${e.author}`);
+        if (e.mood) rows.push(`気分: ${e.mood}`);
+        if (e.favorite) rows.push('お気に入り: ★');
+        rows.push(`タイトル: ${e.title || ''}`, thin, e.content || '', '');
+        return rows.join('\n');
+      });
 
       const text = head.join('\n') + '\n\n' + blocks.join('\n') + '\n' + line + '\n';
       const fileName = `memory-diary-backup-${formatDateISO(now).replace(/-/g, '')}.txt`;
@@ -1545,16 +2009,16 @@
       }
     };
 
-    // ---------- バックアップ（テキスト読み込み） ----------
-    // 書き出したテキスト（exportBackup の形式）を解析して、日記の配列にする
+    // ---------- バックアップ（読み込み） ----------
+    // 書き出したテキストを解析（古い形式・新しい形式のどちらも読めます）
     function parseBackupText(raw) {
       const text = String(raw || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
       const lines = text.split('\n');
       const isDelim = (s) => /^={20,}$/.test((s || '').trim());
-      const isStart = (k) => isDelim(lines[k]) && /^日付:/.test((lines[k + 1] || '').trim());
+      const isStart = (k) => isDelim(lines[k]) && /^日付[:：]/.test((lines[k + 1] || '').trim());
       const isFinal = (k) => isDelim(lines[k]) && lines.slice(k + 1).every(l => !l.trim());
 
-      const am = text.match(/^記念日:\s*(\d{4}-\d{2}-\d{2})\s*$/m);
+      const am = text.match(/^記念日[:：]\s*(\d{4}-\d{2}-\d{2})\s*$/m);
       const anniversary = am ? am[1] : '';
 
       const entries = [];
@@ -1569,43 +2033,52 @@
         const block = lines.slice(i + 1, end);
         i = end;
 
-        const dateLine = block[0] || '';
+        let dashIdx = -1;
+        for (let k = 0; k < Math.min(block.length, 12); k++) {
+          if (/^-{10,}$/.test((block[k] || '').trim())) { dashIdx = k; break; }
+        }
+        if (dashIdx < 0) { broken++; continue; }
+
+        const f = {};
+        for (let k = 0; k < dashIdx; k++) {
+          const m = block[k].match(/^(日付|項目|タイトル|書いた人|気分|お気に入り)[:：]\s*(.*)$/);
+          if (m && !(m[1] in f)) f[m[1]] = m[2].trim();
+        }
+
         let dateStr = '';
-        const jp = dateLine.match(/(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日/);
-        const iso = dateLine.match(/(\d{4})-(\d{2})-(\d{2})/);
+        const dl = f['日付'] || '';
+        const jp = dl.match(/(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日/);
+        const iso = dl.match(/(\d{4})-(\d{2})-(\d{2})/);
         if (jp) dateStr = `${jp[1]}-${String(jp[2]).padStart(2, '0')}-${String(jp[3]).padStart(2, '0')}`;
         else if (iso) dateStr = iso[0];
 
-        // 実在する日付かを確認
         let validDate = false;
         if (dateStr) {
           const [y, m, d] = dateStr.split('-').map(Number);
           const dt = new Date(y, m - 1, d);
           validDate = dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d;
         }
+        if (!validDate || !('タイトル' in f)) { broken++; continue; }
 
-        const tagLine = (block[1] || '').startsWith('項目:') ? block[1] : '';
-        const titleLine = (block[2] || '').startsWith('タイトル:') ? block[2] : '';
-        let dashIdx = -1;
-        for (let k = 1; k < Math.min(block.length, 6); k++) {
-          if (/^-{10,}$/.test((block[k] || '').trim())) { dashIdx = k; break; }
-        }
-
-        if (!validDate || !titleLine || dashIdx < 0) { broken++; continue; }
-
-        let tag = tagLine.replace(/^項目:\s*/, '').trim();
+        let tag = f['項目'] || '';
         if (!TAGS.includes(tag)) tag = '日常';
-        const title = titleLine.replace(/^タイトル:\s*/, '').trim() || '（無題）';
         const content = block.slice(dashIdx + 1).join('\n').replace(/\s+$/, '');
+        const fav = /★|はい|true|1/i.test(f['お気に入り'] || '');
 
-        entries.push({ date: dateStr, tag, title, content });
+        entries.push({
+          date: dateStr,
+          tag,
+          title: f['タイトル'] || '（無題）',
+          content,
+          author: f['書いた人'] || '',
+          mood: f['気分'] || '',
+          favorite: fav
+        });
       }
       return { entries, anniversary, broken };
     }
 
-    function entryKey(e) {
-      return `${e.date}\u0000${e.title || ''}\u0000${e.content || ''}`;
-    }
+    function entryKey(e) { return `${e.date}\u0000${e.title || ''}\u0000${e.content || ''}`; }
 
     window.handleImportFile = async function (ev) {
       const file = ev.target.files && ev.target.files[0];
@@ -1638,7 +2111,6 @@
         return;
       }
 
-      // 重複・範囲外を除外
       const existing = new Set(diaryEntries.map(entryKey));
       const seen = new Set();
       const toAdd = [];
@@ -1702,6 +2174,9 @@
             title: e.title,
             content: e.content,
             tag: e.tag,
+            author: e.author || '',
+            mood: e.mood || '',
+            favorite: !!e.favorite,
             createdAt: iso,
             updatedAt: iso
           }
@@ -1725,7 +2200,6 @@
           throw new Error('not-ready');
         }
 
-        // 記念日が未設定なら、ファイルの記念日を反映
         if (anniversary && !userSettings.anniversaryDate && isDateInRange(anniversary)) {
           try { await savePrefs({ anniversaryDate: anniversary }); } catch (e) { /* 日記の取り込みは成功しているので無視 */ }
         }
@@ -1741,11 +2215,44 @@
     };
 
     // ---------- 設定モーダル ----------
+    function renderMeOptions() {
+      const field = document.getElementById('meField');
+      const a = (userSettings.nameA || '').trim();
+      const b = (userSettings.nameB || '').trim();
+      field.classList.toggle('hidden', !(a || b));
+      const me = lsGet(LS.me) || 'A';
+      const on = 'flex-1 py-2.5 rounded-xl bg-roseAccent text-white text-xs font-bold transition';
+      const off = 'flex-1 py-2.5 rounded-xl bg-cream hover:bg-roseLight border border-ivory text-cocoa text-xs font-medium transition';
+      document.getElementById('meOptions').innerHTML = [['A', a], ['B', b]]
+        .filter(([, n]) => n)
+        .map(([k, n]) => `<button type="button" onclick="setMe('${k}')" class="${me === k ? on : off}">${escapeHtml(n)}</button>`).join('');
+    }
+
+    window.setMe = function (k) { lsSet(LS.me, k); renderMeOptions(); showToast('この端末の書き手を変更しました'); };
+
+    window.saveNames = async function () {
+      const nameA = document.getElementById('settingNameA').value.trim().slice(0, 12);
+      const nameB = document.getElementById('settingNameB').value.trim().slice(0, 12);
+      try {
+        await savePrefs({ nameA, nameB });
+        userSettings = { ...userSettings, nameA, nameB };
+        renderMeOptions();
+        showToast('名前を保存しました');
+      } catch (err) {
+        console.error('Names save error:', err);
+        showToast('名前を保存できませんでした', true);
+      }
+    };
+
     window.openSettingsModal = function () {
       document.getElementById('settingAnniversaryInput').value = userSettings.anniversaryDate || '';
+      document.getElementById('settingNameA').value = userSettings.nameA || '';
+      document.getElementById('settingNameB').value = userSettings.nameB || '';
       document.getElementById('settingPinInput').value = '';
       document.getElementById('displaySyncCode').textContent = syncCode || '未設定';
       document.getElementById('syncSection').classList.toggle('hidden', mode === 'local');
+      renderDisplayButtons();
+      renderMeOptions();
       refreshPinStatus();
       updateUsageText();
       window.cancelImport();
@@ -1789,7 +2296,7 @@
     };
 
     window.generateSyncCode = function () {
-      const chars = 'abcdefghjkmnpqrstuvwxyz23456789'; // 紛らわしい文字を除外
+      const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
       const bytes = new Uint8Array(12);
       if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
       else for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
@@ -1813,20 +2320,26 @@
       }
     };
 
-    // ---------- クリック委譲（日記カードのボタン類） ----------
+    // ---------- クリック委譲 ----------
     document.addEventListener('click', (e) => {
       const el = e.target.closest('[data-action]');
       if (!el) return;
       const { action, id, date } = el.dataset;
       if (action === 'edit') window.editEntry(id);
       else if (action === 'delete') window.requestDeleteEntry(id);
+      else if (action === 'fav') window.toggleFavorite(id);
       else if (action === 'write') window.openEditorForDate(date);
       else if (action === 'jump') window.jumpToEntryDate(date);
+      else if (action === 'dismiss-reminder') { lsSet(LS.reminder, formatDateISO(new Date())); renderReminder(); }
     });
 
     // ---------- 描画・起動 ----------
     function renderAll() {
       updateStatsDashboard();
+      updateInsights();
+      renderReminder();
+      renderOnThisDay();
+      renderAuthorFilter();
       renderCalendar();
       renderSelectedDateCard();
       renderTimeline();
@@ -1840,8 +2353,13 @@
 
       syncCode = lsGet(LS.code) || '';
       pinHash = lsGet(LS.pin) || '';
+      buildPinPad();
       if (pinHash) showLock();
 
+      applyTheme();
+      applyFontSize();
+      buildEditorControls();
+      renderTagChips();
       setupFavicon();
       setupBodyScrollLock();
       setupCalendarSwipe();
