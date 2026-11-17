@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#FAF8F5">
   <title>ふたりの思い出日記 - Memory Diary</title>
 
-  <!-- ファビコン（💕）：SVG版。PNG版（Safari・iPhoneホーム画面用）はJSで追加します -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%95%3C/text%3E%3C/svg%3E">
+  <!-- ファビコン（📓）：SVG版。PNG版（Safari・iPhoneホーム画面用）はJSで追加します -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%93%3C/text%3E%3C/svg%3E">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -226,7 +226,6 @@
       <!-- 左カラム -->
       <div id="calendarColumn" class="lg:col-span-6 space-y-4 sm:space-y-5 lg:block">
         <div class="bg-white rounded-3xl p-4 sm:p-6 border border-ivory shadow-sm">
-          <!-- カレンダーヘッダー：スマホでは「前月 / 年・月 / 翌月」を1行に -->
           <div class="flex items-center justify-between mb-3 sm:mb-4">
             <div class="flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-start">
               <button type="button" onclick="changeMonth(-1)" class="w-10 h-10 sm:w-9 sm:h-9 rounded-xl bg-cream hover:bg-roseLight text-cocoa flex items-center justify-center transition shrink-0" aria-label="前月">
@@ -293,7 +292,6 @@
             </button>
           </div>
 
-          <!-- タグ絞り込み：スマホでは横にスワイプ -->
           <div id="filterTagsContainer" class="flex gap-1.5 mb-4 sm:mb-5 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1 sm:flex-wrap sm:overflow-visible">
             <button type="button" onclick="setTagFilter('すべて')" data-tag="すべて" class="tag-chip active shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold bg-roseAccent text-white transition">すべて</button>
             <button type="button" onclick="setTagFilter('デート')" data-tag="デート" class="tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">💕 デート</button>
@@ -303,7 +301,6 @@
             <button type="button" onclick="setTagFilter('日常')" data-tag="日常" class="tag-chip shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-cream text-cocoa hover:bg-roseLight transition">☕ 日常</button>
           </div>
 
-          <!-- スマホではページ全体でスクロール、PCは枠内スクロール -->
           <div id="entriesTimeline" class="space-y-3 lg:max-h-[600px] lg:overflow-y-auto lg:pr-1"></div>
         </div>
       </div>
@@ -395,6 +392,14 @@
       </div>
 
       <div class="p-5 sm:p-6 safe-bottom sm:pb-6 space-y-5 overflow-y-auto overscroll-contain">
+        <!-- 閲覧専用サイトへのリンク -->
+        <a href="viewer.html" class="flex items-center justify-between gap-2 px-4 py-3 rounded-xl bg-cream hover:bg-roseLight border border-ivory text-cocoa text-sm font-bold transition">
+          <span class="flex items-center gap-2"><i class="fa-solid fa-book-open text-roseAccent"></i>閲覧専用サイトを開く</span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-taupe text-xs"></i>
+        </a>
+
+        <hr class="border-ivory">
+
         <!-- 記念日 -->
         <div>
           <label class="block text-xs font-bold text-cocoa mb-1">
@@ -426,7 +431,7 @@
         <!-- バックアップ -->
         <div>
           <label class="block text-xs font-bold text-cocoa mb-1">
-            <i class="fa-solid fa-download text-roseAccent mr-1"></i>バックアップ（テキストで書き出し）
+            <i class="fa-solid fa-download text-roseAccent mr-1"></i>バックアップ（書き出し・読み込み）
           </label>
           <p class="text-[11px] text-taupe mb-2 leading-relaxed">
             日付・項目・タイトル・本文を、日付の古い順にまとめたテキストファイル（.txt）として保存します。万が一に備えて、ときどき保存しておくと安心です。
@@ -436,6 +441,19 @@
             <i class="fa-solid fa-file-lines"></i>
             <span>日記をテキストファイルに書き出す</span>
           </button>
+
+          <!-- 読み込み -->
+          <div class="mt-3 pt-3 border-t border-ivory">
+            <p class="text-[11px] text-taupe mb-2 leading-relaxed">
+              このアプリで書き出したテキストファイルから、日記を取り込めます。すでにある日記と同じ内容は、重複して取り込みません。
+            </p>
+            <input type="file" id="importFileInput" accept=".txt,text/plain" class="hidden" onchange="handleImportFile(event)">
+            <button type="button" onclick="document.getElementById('importFileInput').click()" class="w-full py-3 rounded-xl bg-cream hover:bg-roseLight border border-ivory text-cocoa text-sm font-bold transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-file-import text-roseAccent"></i>
+              <span>テキストファイルから読み込む</span>
+            </button>
+            <div id="importPreview" class="hidden mt-2 rounded-xl bg-roseLight/40 border border-roseAccent/30 p-3.5"></div>
+          </div>
         </div>
 
         <hr class="border-ivory">
@@ -524,6 +542,7 @@
   <script type="module">
     // ---------- 設定 ----------
     // ※ appId・合言葉から作る保存先(spaceId)・コレクション名は、変更すると今の日記が見えなくなります。
+    const FAVICON_EMOJI = '📓'; // ファビコンの絵文字（ここを変えるとタブのアイコンが変わります）
     const firebaseConfigText = (typeof __firebase_config !== 'undefined')
       ? __firebase_config
       : (window.__firebase_config || '');
@@ -534,6 +553,7 @@
       entries: 'memoryDiary.local.entries',
       prefs: 'memoryDiary.local.prefs'
     };
+    const TAGS = ['デート', '記念日', '旅行', '幸せ', '日常'];
 
     // 日付の範囲（カレンダー・日記・記念日で共通）
     const CAL_MIN_YEAR = 2000;
@@ -579,6 +599,7 @@
     let selectedDateStr = '';
     let currentTagFilter = 'すべて';
     let pendingDeleteId = null;
+    let pendingImport = null; // 読み込み待ちの内容
 
     let pinHash = '';
     let enteredPin = '';
@@ -686,7 +707,7 @@
       dot.className = `w-2 h-2 shrink-0 rounded-full inline-block ${colors[status] || 'bg-amber-400'}`;
     }
 
-    // ---------- ファビコン（💕）：PNG版を作って設定（Safari・iPhoneホーム画面用） ----------
+    // ---------- ファビコン：PNG版を作って設定（Safari・iPhoneホーム画面用） ----------
     function makeEmojiPng(size, bg) {
       const c = document.createElement('canvas');
       c.width = size;
@@ -699,7 +720,7 @@
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = `${Math.floor(size * 0.72)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
-      ctx.fillText('💕', size / 2, size / 2 + size * 0.04);
+      ctx.fillText(FAVICON_EMOJI, size / 2, size / 2 + size * 0.04);
       return c.toDataURL('image/png');
     }
 
@@ -1006,11 +1027,9 @@
     }
 
     // ---------- カレンダー ----------
-    // 年・月のプルダウン（2000年〜2100年に固定）
     function populateCalendarPickers() {
       const ySel = document.getElementById('calYearSelect');
       const mSel = document.getElementById('calMonthSelect');
-      // 範囲外の日付の日記があっても表示できるよう、その年も選択肢に含める
       const minY = Math.min(CAL_MIN_YEAR, currentCalYear);
       const maxY = Math.max(CAL_MAX_YEAR, currentCalYear);
       const count = maxY - minY + 1;
@@ -1085,7 +1104,6 @@
       }
     }
 
-    // 前後の月へ移動（2000年〜2100年の範囲外には出ない）
     window.changeMonth = function (delta) {
       let y = currentCalYear;
       let m = currentCalMonth + delta;
@@ -1115,7 +1133,6 @@
       renderSelectedDateCard();
     };
 
-    // カレンダーを左右にスワイプして月を移動（スマホ）
     function setupCalendarSwipe() {
       const grid = document.getElementById('calendarGrid');
       let sx = 0, sy = 0;
@@ -1399,7 +1416,6 @@
       setSaveIndicator('saving');
       try {
         await saveEntryData(id, payload);
-        // 保存中にさらに入力があった場合は「入力中」表示のまま
         if (!editorDirty) {
           setSaveIndicator('saved');
           clearTimeout(indicatorTimer);
@@ -1529,6 +1545,201 @@
       }
     };
 
+    // ---------- バックアップ（テキスト読み込み） ----------
+    // 書き出したテキスト（exportBackup の形式）を解析して、日記の配列にする
+    function parseBackupText(raw) {
+      const text = String(raw || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
+      const lines = text.split('\n');
+      const isDelim = (s) => /^={20,}$/.test((s || '').trim());
+      const isStart = (k) => isDelim(lines[k]) && /^日付:/.test((lines[k + 1] || '').trim());
+      const isFinal = (k) => isDelim(lines[k]) && lines.slice(k + 1).every(l => !l.trim());
+
+      const am = text.match(/^記念日:\s*(\d{4}-\d{2}-\d{2})\s*$/m);
+      const anniversary = am ? am[1] : '';
+
+      const entries = [];
+      let broken = 0;
+      let i = 0;
+      while (i < lines.length) {
+        if (!isStart(i)) { i++; continue; }
+        let end = lines.length;
+        for (let k = i + 1; k < lines.length; k++) {
+          if (isStart(k) || isFinal(k)) { end = k; break; }
+        }
+        const block = lines.slice(i + 1, end);
+        i = end;
+
+        const dateLine = block[0] || '';
+        let dateStr = '';
+        const jp = dateLine.match(/(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日/);
+        const iso = dateLine.match(/(\d{4})-(\d{2})-(\d{2})/);
+        if (jp) dateStr = `${jp[1]}-${String(jp[2]).padStart(2, '0')}-${String(jp[3]).padStart(2, '0')}`;
+        else if (iso) dateStr = iso[0];
+
+        // 実在する日付かを確認
+        let validDate = false;
+        if (dateStr) {
+          const [y, m, d] = dateStr.split('-').map(Number);
+          const dt = new Date(y, m - 1, d);
+          validDate = dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d;
+        }
+
+        const tagLine = (block[1] || '').startsWith('項目:') ? block[1] : '';
+        const titleLine = (block[2] || '').startsWith('タイトル:') ? block[2] : '';
+        let dashIdx = -1;
+        for (let k = 1; k < Math.min(block.length, 6); k++) {
+          if (/^-{10,}$/.test((block[k] || '').trim())) { dashIdx = k; break; }
+        }
+
+        if (!validDate || !titleLine || dashIdx < 0) { broken++; continue; }
+
+        let tag = tagLine.replace(/^項目:\s*/, '').trim();
+        if (!TAGS.includes(tag)) tag = '日常';
+        const title = titleLine.replace(/^タイトル:\s*/, '').trim() || '（無題）';
+        const content = block.slice(dashIdx + 1).join('\n').replace(/\s+$/, '');
+
+        entries.push({ date: dateStr, tag, title, content });
+      }
+      return { entries, anniversary, broken };
+    }
+
+    function entryKey(e) {
+      return `${e.date}\u0000${e.title || ''}\u0000${e.content || ''}`;
+    }
+
+    window.handleImportFile = async function (ev) {
+      const file = ev.target.files && ev.target.files[0];
+      ev.target.value = '';
+      if (!file) return;
+
+      if (!entriesLoaded || !canSave()) {
+        showToast('まだ接続できていません。少し待ってからお試しください', true);
+        return;
+      }
+      if (file.size > 20 * 1024 * 1024) {
+        showToast('ファイルが大きすぎます（20MBまで）', true);
+        return;
+      }
+
+      let text = '';
+      try {
+        text = await file.text();
+      } catch (err) {
+        console.error('Read file error:', err);
+        showToast('ファイルを読み込めませんでした', true);
+        return;
+      }
+
+      const parsed = parseBackupText(text);
+      if (parsed.entries.length === 0) {
+        pendingImport = null;
+        showImportPreview(`<p class="text-xs text-red-500 font-bold">日記が見つかりませんでした。</p>
+          <p class="text-[11px] text-taupe mt-1 leading-relaxed">このアプリで書き出したテキストファイルを選んでください。</p>`);
+        return;
+      }
+
+      // 重複・範囲外を除外
+      const existing = new Set(diaryEntries.map(entryKey));
+      const seen = new Set();
+      const toAdd = [];
+      let dup = 0, outOfRange = 0;
+      for (const e of parsed.entries) {
+        if (!isDateInRange(e.date)) { outOfRange++; continue; }
+        const k = entryKey(e);
+        if (existing.has(k) || seen.has(k)) { dup++; continue; }
+        seen.add(k);
+        toAdd.push(e);
+      }
+
+      pendingImport = { toAdd, anniversary: parsed.anniversary };
+      const unreadable = parsed.broken + outOfRange;
+
+      showImportPreview(`
+        <p class="text-xs font-bold text-cocoa mb-2">ファイルの内容を確認しました</p>
+        <ul class="text-[11px] text-taupe space-y-0.5 mb-3">
+          <li>見つかった日記：<b class="text-cocoa">${parsed.entries.length}件</b></li>
+          <li>取り込む日記：<b class="text-roseDark">${toAdd.length}件</b></li>
+          <li>すでにあるためスキップ：${dup}件</li>
+          ${unreadable ? `<li>読み取れなかった・範囲外：${unreadable}件</li>` : ''}
+        </ul>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="cancelImport()" class="flex-1 py-2.5 rounded-xl bg-white border border-ivory text-cocoa text-xs font-bold">やめる</button>
+          <button type="button" id="runImportBtn" onclick="runImport()" ${toAdd.length === 0 ? 'disabled' : ''} class="flex-1 py-2.5 rounded-xl bg-roseAccent hover:bg-roseDark disabled:opacity-40 text-white text-xs font-bold">
+            ${toAdd.length === 0 ? '取り込む日記がありません' : `${toAdd.length}件を取り込む`}
+          </button>
+        </div>
+      `);
+    };
+
+    function showImportPreview(html) {
+      const box = document.getElementById('importPreview');
+      box.innerHTML = html;
+      box.classList.remove('hidden');
+    }
+
+    window.cancelImport = function () {
+      pendingImport = null;
+      const box = document.getElementById('importPreview');
+      box.innerHTML = '';
+      box.classList.add('hidden');
+    };
+
+    window.runImport = async function () {
+      if (!pendingImport || !pendingImport.toAdd.length) return;
+      if (!canSave()) { showToast('まだ接続できていません', true); return; }
+
+      const btn = document.getElementById('runImportBtn');
+      if (btn) { btn.disabled = true; btn.textContent = '取り込み中...'; }
+
+      const { toAdd, anniversary } = pendingImport;
+      const base = Date.now();
+      const records = toAdd.map((e, idx) => {
+        const iso = new Date(base + idx).toISOString();
+        return {
+          id: newId(),
+          data: {
+            date: e.date,
+            title: e.title,
+            content: e.content,
+            tag: e.tag,
+            createdAt: iso,
+            updatedAt: iso
+          }
+        };
+      });
+
+      try {
+        if (mode === 'cloud' && db && spaceId) {
+          const CHUNK = 400;
+          for (let s = 0; s < records.length; s += CHUNK) {
+            const batch = fs.writeBatch(db);
+            records.slice(s, s + CHUNK).forEach(r => batch.set(entryDocRef(r.id), r.data));
+            await batch.commit();
+          }
+        } else if (mode === 'local') {
+          records.forEach(r => diaryEntries.push({ id: r.id, ...r.data }));
+          sortEntries();
+          persistLocal();
+          renderAll();
+        } else {
+          throw new Error('not-ready');
+        }
+
+        // 記念日が未設定なら、ファイルの記念日を反映
+        if (anniversary && !userSettings.anniversaryDate && isDateInRange(anniversary)) {
+          try { await savePrefs({ anniversaryDate: anniversary }); } catch (e) { /* 日記の取り込みは成功しているので無視 */ }
+        }
+
+        showToast(`${records.length}件の日記を取り込みました`);
+        window.cancelImport();
+        updateUsageText();
+      } catch (err) {
+        console.error('Import error:', err);
+        showToast('取り込みに失敗しました。もう一度お試しください', true);
+        if (btn) { btn.disabled = false; btn.textContent = `${toAdd.length}件を取り込む`; }
+      }
+    };
+
     // ---------- 設定モーダル ----------
     window.openSettingsModal = function () {
       document.getElementById('settingAnniversaryInput').value = userSettings.anniversaryDate || '';
@@ -1537,6 +1748,7 @@
       document.getElementById('syncSection').classList.toggle('hidden', mode === 'local');
       refreshPinStatus();
       updateUsageText();
+      window.cancelImport();
       document.getElementById('settingsModal').classList.remove('hidden');
     };
 
